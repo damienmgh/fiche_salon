@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MGH Fiche salon</title>
+<meta name="theme-color" content="#24346C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* Layout: barre d'entête blanche + logo, vue Liste ou vue Fiche, barre d'actions collée en bas. Charte MGH. */
+:root{
+  --navy:#24346C; --navy-dk:#18234A; --grey-logo:#98999B;
+  --fg:#2B2B2B; --muted:#5E6270; --line:#D9DCE3; --soft:#F2F4F8; --bg:#FFFFFF; --page:#F6F7FA;
+  --ok:#2E7D32; --warn:#C77700; --crit:#B71C1C;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Calibri, Arial, sans-serif;
+  --r:6px; color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);font-size:16px;color:var(--fg);background:var(--page);-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid #7C93D6;outline-offset:2px}
+
+.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:2px solid var(--navy);
+  padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;display:flex;align-items:center;gap:12px}
+.top img{height:40px;width:auto}
+.top .ttl{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.top .ttl b{color:var(--navy);font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .ttl span{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .sp{flex:1}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;flex:none}
+.lang button{border:0;background:var(--bg);min-width:42px;min-height:44px;font-weight:700;font-size:14px;color:var(--muted)}
+.lang button+button{border-left:1px solid var(--line)}
+.lang button.on{background:var(--navy);color:#fff}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:var(--r);padding:10px 14px;min-height:44px;font-weight:600;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none;color:var(--fg)}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.pri:active{background:var(--navy-dk)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--navy)}
+.btn.danger{color:var(--crit);border-color:#E7C4C4}
+.btn.dangerfill{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn svg{width:20px;height:20px;flex:none}
+.icon-btn{width:44px;height:44px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);display:inline-grid;place-items:center;color:var(--navy);flex:none}
+.icon-btn svg{width:22px;height:22px}
+
+main{max-width:1000px;margin:0 auto;padding:16px 16px 120px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.search{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;min-height:44px;background:var(--bg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.seg button{border:0;background:transparent;padding:0 14px;min-height:44px;font-weight:600;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--navy);color:#fff}
+.stats{display:flex;flex-wrap:wrap;gap:16px;color:var(--muted);font-size:14px;margin:4px 0 12px;font-variant-numeric:tabular-nums}
+.stats b{color:var(--fg)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.card{position:relative;background:var(--bg);border:1px solid var(--line);border-left:5px solid var(--grey-logo);border-radius:var(--r);min-width:0}
+.card.pA{border-left-color:var(--crit)} .card.pB{border-left-color:var(--warn)} .card.pC{border-left-color:var(--grey-logo)}
+.card .open{display:flex;flex-direction:column;gap:6px;width:100%;text-align:left;border:0;background:transparent;padding:12px 56px 12px 14px;min-width:0}
+.card .del{position:absolute;top:6px;right:6px;width:44px;height:44px;border:0;background:transparent;color:var(--muted);border-radius:var(--r);display:grid;place-items:center}
+.card .del:active,.card .del:hover{color:var(--crit);background:#FBEDED}
+.card .del svg{width:20px;height:20px}
+.card .l1{display:flex;gap:8px;align-items:baseline;min-width:0;width:100%}
+.card .soc{font-weight:700;font-size:17px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.card .no{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.card .who{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+.card .l3{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--soft);color:var(--fg)}
+.pill.draft{color:var(--warn);border-color:#EBD3A8;background:#FFF7EA}
+.pill.done{color:var(--ok);border-color:#BFDCC1;background:#EFF8F0}
+.pill.shared{color:var(--navy);border-color:#C5CDE6;background:#EEF1FA}
+.pill.pA{color:#fff;background:var(--crit);border-color:var(--crit)}
+.pill.pB{color:#fff;background:var(--warn);border-color:var(--warn)}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--navy)}
+.empty{background:var(--bg);border:1px dashed var(--line);border-radius:var(--r);padding:32px 20px;text-align:center;color:var(--muted);grid-column:1/-1}
+.empty b{display:block;color:var(--navy);font-size:18px;margin-bottom:6px}
+
+.sec{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.sec h2{margin:0;background:var(--navy);color:#fff;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px}
+.sec .body{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.full{grid-column:1/-1}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld>label,.lbl{font-size:13px;font-weight:700;color:var(--navy);letter-spacing:.02em}
+.fld input,.fld textarea,.other{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;min-height:46px;background:var(--bg);width:100%}
+.fld textarea{min-height:90px;resize:vertical}
+.fld input:focus,.fld textarea:focus,.other:focus{border-color:var(--navy);outline:none;box-shadow:0 0 0 2px #C5CDE6}
+.fld.err input{border-color:var(--crit)}
+.fld .errmsg{color:var(--crit);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:9px 15px;min-height:44px;font-size:15px;display:inline-flex;align-items:center;gap:6px}
+.chip::before{content:"";width:14px;height:14px;border:2px solid var(--grey-logo);border-radius:3px;flex:none}
+.chips.one .chip::before{border-radius:50%}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip.on::before{border-color:#fff;background:#fff;box-shadow:inset 0 0 0 3px var(--navy)}
+.other{margin-top:8px;max-width:420px}
+.sub{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--fg);margin-bottom:2px}
+.parcwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+table.parc{border-collapse:collapse;width:100%;min-width:760px}
+table.parc th{background:var(--soft);color:var(--navy);font-size:12px;text-align:left;padding:8px;font-weight:700;border-bottom:1px solid var(--line)}
+table.parc td{padding:4px;border-bottom:1px solid var(--line)}
+table.parc input{border:1px solid transparent;border-radius:4px;padding:8px;width:100%;min-height:40px;background:transparent}
+table.parc input:focus{border-color:var(--navy);outline:none;background:var(--bg)}
+table.parc .rm{border:0;background:transparent;color:var(--crit);width:40px;height:40px;font-size:20px}
+.photo{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.photo img{max-height:140px;max-width:100%;border:1px solid var(--line);border-radius:4px}
+.hdrinfo{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:14px;margin:0 0 12px;font-variant-numeric:tabular-nums}
+.hdrinfo b{color:var(--fg)}
+.save{font-size:13px;color:var(--ok)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);border-top:1px solid var(--line);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.bar .sp{flex:1}
+
+.ov{position:fixed;inset:0;background:rgba(24,35,74,.45);z-index:50;display:grid;place-items:center;padding:16px}
+.dlg{background:var(--bg);border-radius:8px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:18px}
+.dlg h3{margin:0 0 12px;color:var(--navy)}
+.dlg .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.dlg .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dlg pre{white-space:pre-wrap;background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:10px;font-size:13px;max-height:40vh;overflow:auto}
+.dlg p{margin:0 0 10px;line-height:1.45}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy-dk);color:#fff;padding:8px 8px 8px 16px;border-radius:var(--r);z-index:60;font-size:15px;max-width:92vw;display:flex;align-items:center;gap:12px;min-height:44px}
+.toast button{border:0;background:transparent;color:#FFD08A;font-weight:700;min-height:40px;padding:0 10px;text-transform:uppercase;letter-spacing:.04em}
+.warnbar{background:#FFF7EA;border:1px solid #EBD3A8;color:#7A4A00;border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:14px}
+
+#print{display:none}
+.dict .help{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.dictbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.rec{color:var(--crit);border-color:#E7C4C4}
+.btn.rec.on{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn.rec.on svg{animation:pulse 1.1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.interim{color:var(--muted);font-size:14px;font-style:italic;flex:1 1 180px;min-width:0}
+.rv{display:grid;gap:8px}
+.rv .it{display:grid;grid-template-columns:28px minmax(110px,32%) 1fr;gap:4px 10px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:8px 10px}
+.rv input[type=checkbox]{width:22px;height:22px;accent-color:var(--navy);margin:0}
+.rv .k{font-weight:700;color:var(--navy);font-size:13px}
+.rv .v{min-width:0;overflow-wrap:anywhere}
+.rv .v input{width:100%;border:1px solid var(--line);border-radius:4px;padding:6px 8px;min-height:40px}
+.rv .curv{grid-column:2/-1;font-size:12px;color:var(--muted)}
+@media (max-width:640px){.rv .it{grid-template-columns:28px 1fr}.rv .v,.rv .curv{grid-column:2}}
+@media (max-width:640px){
+  .sec .body,.dlg .grid{grid-template-columns:1fr}
+  .top img{height:32px}
+  .top{gap:8px}
+  .lbl-sm{display:none}
+  .bar .btn{padding:10px 11px}
+}
+@media print{
+  body{background:#fff}
+  .top,.bar,main,.ov,.toast{display:none!important}
+  #print{display:block;font-size:11pt;color:#2B2B2B}
+  #print img{height:42px}
+  #print h1{color:var(--navy);font-size:18pt;margin:10px 0 2px}
+  #print .meta{color:#6B6B6B;font-size:10pt;margin-bottom:10px;border-bottom:1.5pt solid var(--navy);padding-bottom:6px}
+  #print h2{background:var(--navy);color:#fff;font-size:10pt;padding:3px 8px;margin:10px 0 4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #print table{width:100%;border-collapse:collapse}
+  #print td{padding:3px 6px;vertical-align:top;border-bottom:.5pt solid #ddd}
+  #print td.k{width:32%;font-weight:700;color:var(--navy)}
+  #print .carte{max-height:5cm;margin-top:6px}
+  #print .ft{margin-top:14px;font-size:8pt;color:#6B6B6B}
+  #print .pg{break-before:page;page-break-before:always}
+  #print .hd{display:flex;justify-content:space-between;align-items:center;color:#6B6B6B;font-size:9pt}
+  #print table.recap{font-size:9pt;margin-top:6px}
+  #print table.recap th{background:var(--navy);color:#fff;text-align:left;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #print table.recap tr{break-inside:avoid}
+  #print table.recap td.c{text-align:center}
+  #print h2,#print td.k{break-after:avoid}
+  @page{size:A4;margin:14mm 12mm}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img src="logo.png" alt="MGH Industrial Gears">
+  <div class="ttl"><b id="hTitle"></b><span id="hSub"></span></div>
+  <div class="sp"></div>
+  <div class="lang" role="group" aria-label="Langue / Taal / Language">
+    <button data-lang="fr">FR</button><button data-lang="nl">NL</button><button data-lang="en">EN</button>
+  </div>
+  <button class="icon-btn" id="bSettings" data-i18n-aria="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+</header>
+
+<main>
+  <div id="storeWarn" class="warnbar" hidden data-i18n="storeWarn"></div>
+
+  <section id="vList">
+    <div class="toolbar">
+      <input id="q" class="search" type="search" data-i18n-ph="search">
+      <div class="seg" role="group">
+        <button data-prio="" class="on" data-i18n="all"></button><button data-prio="A">A</button><button data-prio="B">B</button><button data-prio="C">C</button>
+      </div>
+      <div class="seg" role="group">
+        <button data-etat="" class="on" data-i18n="allStates"></button><button data-etat="draft" data-i18n="drafts"></button><button data-etat="notshared" data-i18n="notShared"></button>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="vForm" hidden>
+    <div class="hdrinfo" id="fInfo"></div>
+    <form id="form" autocomplete="off" onsubmit="return false"></form>
+  </section>
+</main>
+
+<nav class="bar" id="barList">
+  <button class="btn" id="bMore">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span data-i18n="export"></span></button>
+  <button class="btn" id="bPdfAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><span data-i18n="pdfAll"></span></button>
+  <div class="sp"></div>
+  <button class="btn pri" id="bNew">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="newForm"></span></button>
+</nav>
+
+<nav class="bar" id="barForm" hidden>
+  <button class="btn ghost" id="bBack">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg><span data-i18n="list"></span></button>
+  <span class="save" id="saveState"></span>
+  <div class="sp"></div>
+  <button class="btn danger" id="bDel">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg><span class="lbl-sm" data-i18n="delete"></span></button>
+  <button class="btn" id="bPrint">PDF</button>
+  <button class="btn" id="bShare">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span data-i18n="share"></span></button>
+  <button class="btn pri" id="bDone" data-i18n="finish"></button>
+  <button class="btn pri" id="bNext" data-i18n="newForm"></button>
+</nav>
+
+<div id="ov" class="ov" hidden><div class="dlg" id="dlg" role="dialog" aria-modal="true"></div></div>
+<div id="toast" class="toast" hidden><span id="toastMsg"></span><button id="toastBtn" hidden></button></div>
+<div id="print"></div>
+
+<script>
+'use strict';
+/* ---------- Définition du formulaire (valeurs canoniques en français) ---------- */
+const SECTIONS = [
+ {t:'Dictée et transcription', f:[{k:'transcript',l:'Transcription',y:'dict'}]},
+ {t:'Contexte', f:[
+  {k:'recuPar',l:'Reçu par',y:'one',o:['DM','LM','HH','JD','LMA']},
+  {k:'secteurAttr',l:'Secteur attribué',y:'one',o:['DM','LM','HH','LMA']},
+  {k:'jour',l:'Jour',y:'one',o:['J1','J2','J3']},
+  {k:'statut',l:'Statut',y:'one',o:['Prospect','Client existant','Ancien client','Concurrent / fournisseur','Autre']},
+ ]},
+ {t:'1. Identification', f:[
+  {k:'societe',l:'Société',y:'text',req:1},{k:'site',l:'Site / usine',y:'text'},
+  {k:'rue',l:'Rue',y:'text'},{k:'cpVille',l:'CP / Ville',y:'text'},
+  {k:'pays',l:'Pays',y:'text'},{k:'numClient',l:'N° client MGH',y:'text'},
+  {k:'nom',l:'Nom, prénom',y:'text'},{k:'fonction',l:'Fonction',y:'text'},
+  {k:'mail',l:'Mail',y:'text',im:'email'},{k:'tel',l:'Tél. / GSM',y:'text',im:'tel'},
+  {k:'role',l:'Rôle dans la décision',y:'many',o:['Décideur','Prescripteur technique','Maintenance / utilisateur','Achats']},
+  {k:'carte',l:'Carte de visite',y:'photo'},
+  {k:'autresContacts',l:'Autres contacts',y:'area'},
+ ]},
+ {t:'2. Secteur', f:[{k:'secteurs',l:'Secteur',hideL:1,y:'many',other:'secteurAutre',o:['Aciérie','Chimie','Carrière','Cimenterie','Portuaire / containers','Énergie','Plasturgie','Papeterie','Sucrerie',"Épuration d'eau",'Agroalimentaire','Distribution / logistique','Remontées mécaniques']}]},
+ {t:'3. Applications', f:[{k:'applications',l:'Applications',hideL:1,y:'many',other:'applicationAutre',o:['Broyeur','Élévateur','Pont roulant, levage','Pont roulant, translation','Mélangeur','Convoyeur / transporteur','Tour de refroidissement','Pompe volumétrique',"Vis d'alimentation",'Excitatrice','Extrudeuse','Extrudeuse bi-vis','Machine à papier','Pulpeur','Laminoir','Aérateur de surface','Presse à pulpes','Centrale hydro','Silo']}]},
+ {t:'4. Parc installé', f:[
+  {k:'marques',l:'Marques',y:'many',other:'marqueAutre',o:['Hansen','Flender','SEW','Nord','Rexnord','Stephan']},
+  {k:'parc',l:'Équipements',y:'parc'},
+ ]},
+ {t:'5. Besoin exprimé', f:[
+  {k:'repair',l:'Repair',sub:1,y:'many',o:['Révision réducteur','Réparation / expertise','Upgrading','Urgence en cours']},
+  {k:'service',l:'Service',sub:1,y:'many',o:['Inspection','Condition monitoring',"Analyse d'huile",'Contrat de service','Intervention sur site','Astreinte 24/7','Formation','Arrêt programmé']},
+  {k:'replace',l:'Replace',sub:1,y:'many',o:['Remplacement réducteur','Assemblage motoréducteur','Assemblage réducteur','Équivalence autre marque']},
+  {k:'engineering',l:'Engineering',sub:1,y:'many',other:'engineeringAutre',o:['Étude / dimensionnement','Analyse de défaillance','Adaptation / retrofit']},
+  {k:'negoce',l:'Négoce',sub:1,y:'many',o:['Accouplements','Pièces détachées','Ponts roulants','MGH Breather','MGH Magnet Coupling','Freins','Pompes à huile','Groupes frigorifiques']},
+ ]},
+ {t:'6. Contexte et qualification', f:[
+  {k:'probleme',l:'Problème / déclencheur',y:'area'},
+  {k:'fournisseur',l:'Fournisseur actuel',y:'text'},{k:'concurrent',l:'Concurrent cité',y:'text'},
+  {k:'echeance',l:'Échéance projet',y:'one',o:['Urgent (< 1 mois)','1 à 3 mois','3 à 12 mois','> 12 mois','Inconnue']},
+  {k:'budget',l:'Budget',y:'one',o:['Validé','À valider','Inconnu']},
+  {k:'montant',l:'Montant estimé (€ HTVA)',y:'text',im:'decimal'},
+  {k:'arret',l:'Arrêt programmé',y:'one',o:['Oui','Non','Inconnu']},
+  {k:'arretDate',l:"Date de l'arrêt",y:'date'},
+  {k:'potentiel',l:'Potentiel annuel',y:'one',o:['< 10 k€','10 à 50 k€','50 à 150 k€','> 150 k€']},
+  {k:'interet',l:'Intérêt',y:'one',o:['1 Aucun','2 Curiosité','3 Besoin identifié','4 Projet défini',"5 Demande d'offre"]},
+  {k:'priorite',l:'Priorité',y:'one',o:['A · relance sous 48 h','B · relance sous 2 semaines','C · base marketing']},
+ ]},
+ {t:'7. Action de suivi', f:[
+  {k:'actions',l:'Actions',hideL:1,y:'many',o:['Envoi documentation','Appel de suivi','Visite sur site','Inspection / diagnostic','Offre de prix','Démo / formation','Transfert collègue','Aucune']},
+  {k:'responsable',l:'Responsable',y:'text'},{k:'echeanceSuivi',l:'Échéance',y:'date'},
+  {k:'documents',l:'Documents promis',y:'text'},{k:'crmDate',l:'Saisi CRM le',y:'date'},
+ ]},
+ {t:'8. Notes', f:[{k:'notes',l:'Notes',hideL:1,y:'area',rows:7}]},
+];
+const PARC_COLS=[['equip','Équipement / application'],['marque','Marque'],['type','Type / taille'],['qte','Qté'],['kw','P (kW)'],['age','Âge (ans)'],['crit','Criticité A/B/C']];
+const FIELDS = SECTIONS.flatMap(s=>s.f);
+
+/* ---------- Traductions ---------- */
+// Libellés et options du formulaire : clé = texte français
+const DICT = {
+ nl:{
+  'Contexte':'Context','1. Identification':'1. Identificatie','2. Secteur':'2. Sector','3. Applications':'3. Toepassingen','4. Parc installé':'4. Geïnstalleerd park','5. Besoin exprimé':'5. Geuite behoefte','6. Contexte et qualification':'6. Context en kwalificatie','7. Action de suivi':'7. Opvolgactie','8. Notes':'8. Notities',
+  'Reçu par':'Ontvangen door','Secteur attribué':'Toegewezen regio','Jour':'Dag','Statut':'Status','J1':'D1','J2':'D2','J3':'D3',
+  'Prospect':'Prospect','Client existant':'Bestaande klant','Ancien client':'Voormalige klant','Concurrent / fournisseur':'Concurrent / leverancier','Autre':'Andere',
+  'Société':'Bedrijf','Site / usine':'Site / fabriek','Rue':'Straat','CP / Ville':'Postcode / gemeente','Pays':'Land','N° client MGH':'MGH klantnr.','Nom, prénom':'Naam, voornaam','Fonction':'Functie','Mail':'E-mail','Tél. / GSM':'Tel. / GSM',
+  'Rôle dans la décision':'Rol in de beslissing','Décideur':'Beslisser','Prescripteur technique':'Technisch voorschrijver','Maintenance / utilisateur':'Onderhoud / gebruiker','Achats':'Aankoop',
+  'Carte de visite':'Visitekaartje','Autres contacts':'Andere contacten','Secteur':'Sector','Applications':'Toepassingen',
+  'Aciérie':'Staalindustrie','Chimie':'Chemie','Carrière':'Groeve','Cimenterie':'Cementindustrie','Portuaire / containers':'Haven / containers','Énergie':'Energie','Plasturgie':'Kunststofverwerking','Papeterie':'Papierindustrie','Sucrerie':'Suikerindustrie',"Épuration d'eau":'Waterzuivering','Agroalimentaire':'Voedingsindustrie','Distribution / logistique':'Distributie / logistiek','Remontées mécaniques':'Skiliften',
+  'Broyeur':'Breker / molen','Élévateur':'Elevator','Pont roulant, levage':'Rolbrug, heffen','Pont roulant, translation':'Rolbrug, rijbeweging','Mélangeur':'Menger','Convoyeur / transporteur':'Transportband / transporteur','Tour de refroidissement':'Koeltoren','Pompe volumétrique':'Verdringerpomp',"Vis d'alimentation":'Doseerschroef','Excitatrice':'Bekrachtiger','Extrudeuse':'Extruder','Extrudeuse bi-vis':'Dubbelschroefextruder','Machine à papier':'Papiermachine','Pulpeur':'Pulper','Laminoir':'Walserij','Aérateur de surface':'Oppervlaktebeluchter','Presse à pulpes':'Pulppers','Centrale hydro':'Waterkrachtcentrale','Silo':'Silo',
+  'Marques':'Merken','Équipements':'Uitrusting',
+  'Équipement / application':'Uitrusting / toepassing','Marque':'Merk','Type / taille':'Type / grootte','Qté':'Aantal','Âge (ans)':'Leeftijd (jaar)','Criticité A/B/C':'Kritikaliteit A/B/C',
+  'Négoce':'Handel','Révision réducteur':'Revisie tandwielkast','Réparation / expertise':'Herstelling / expertise','Urgence en cours':'Lopende noodsituatie',
+  'Inspection':'Inspectie',"Analyse d'huile":'Olieanalyse','Contrat de service':'Servicecontract','Intervention sur site':'Interventie ter plaatse','Astreinte 24/7':'24/7 wachtdienst','Formation':'Opleiding','Arrêt programmé':'Geplande stilstand',
+  'Remplacement réducteur':'Vervanging tandwielkast','Assemblage motoréducteur':'Assemblage motorreductor','Assemblage réducteur':'Assemblage tandwielkast','Équivalence autre marque':'Equivalent ander merk',
+  'Étude / dimensionnement':'Studie / dimensionering','Analyse de défaillance':'Faalanalyse','Adaptation / retrofit':'Aanpassing / retrofit',
+  'Accouplements':'Koppelingen','Pièces détachées':'Wisselstukken','Ponts roulants':'Rolbruggen','Freins':'Remmen','Pompes à huile':'Oliepompen','Groupes frigorifiques':'Koelgroepen',
+  'Problème / déclencheur':'Probleem / aanleiding','Fournisseur actuel':'Huidige leverancier','Concurrent cité':'Genoemde concurrent','Échéance projet':'Projecttermijn',
+  'Urgent (< 1 mois)':'Dringend (< 1 maand)','1 à 3 mois':'1 tot 3 maanden','3 à 12 mois':'3 tot 12 maanden','> 12 mois':'> 12 maanden','Inconnue':'Onbekend',
+  'Budget':'Budget','Validé':'Goedgekeurd','À valider':'Te valideren','Inconnu':'Onbekend','Montant estimé (€ HTVA)':'Geschat bedrag (€ excl. btw)',
+  'Oui':'Ja','Non':'Nee',"Date de l'arrêt":'Datum stilstand','Potentiel annuel':'Jaarlijks potentieel','10 à 50 k€':'10 tot 50 k€','50 à 150 k€':'50 tot 150 k€',
+  'Intérêt':'Interesse','1 Aucun':'1 Geen','2 Curiosité':'2 Nieuwsgierigheid','3 Besoin identifié':'3 Behoefte vastgesteld','4 Projet défini':'4 Project gedefinieerd',"5 Demande d'offre":'5 Offerteaanvraag',
+  'Priorité':'Prioriteit','A · relance sous 48 h':'A · opvolging binnen 48 u','B · relance sous 2 semaines':'B · opvolging binnen 2 weken','C · base marketing':'C · marketingbestand',
+  'Actions':'Acties','Envoi documentation':'Documentatie sturen','Appel de suivi':'Opvolgingsgesprek','Visite sur site':'Bezoek ter plaatse','Inspection / diagnostic':'Inspectie / diagnose','Offre de prix':'Prijsofferte','Démo / formation':'Demo / opleiding','Transfert collègue':'Doorsturen naar collega','Aucune':'Geen',
+  'Responsable':'Verantwoordelijke','Échéance':'Deadline','Documents promis':'Beloofde documenten','Saisi CRM le':'Ingevoerd in CRM op','Notes':'Notities',
+ },
+ en:{
+  'Contexte':'Context','1. Identification':'1. Identification','2. Secteur':'2. Industry','3. Applications':'3. Applications','4. Parc installé':'4. Installed base','5. Besoin exprimé':'5. Stated need','6. Contexte et qualification':'6. Context and qualification','7. Action de suivi':'7. Follow-up action','8. Notes':'8. Notes',
+  'Reçu par':'Received by','Secteur attribué':'Assigned territory','Jour':'Day','Statut':'Status','J1':'D1','J2':'D2','J3':'D3',
+  'Prospect':'Prospect','Client existant':'Existing customer','Ancien client':'Former customer','Concurrent / fournisseur':'Competitor / supplier','Autre':'Other',
+  'Société':'Company','Site / usine':'Site / plant','Rue':'Street','CP / Ville':'Postcode / city','Pays':'Country','N° client MGH':'MGH customer no.','Nom, prénom':'Last name, first name','Fonction':'Position','Mail':'Email','Tél. / GSM':'Phone / mobile',
+  'Rôle dans la décision':'Role in decision','Décideur':'Decision maker','Prescripteur technique':'Technical specifier','Maintenance / utilisateur':'Maintenance / user','Achats':'Purchasing',
+  'Carte de visite':'Business card','Autres contacts':'Other contacts','Secteur':'Industry','Applications':'Applications',
+  'Aciérie':'Steel','Chimie':'Chemicals','Carrière':'Quarry','Cimenterie':'Cement','Portuaire / containers':'Port / containers','Énergie':'Energy','Plasturgie':'Plastics','Papeterie':'Paper','Sucrerie':'Sugar',"Épuration d'eau":'Water treatment','Agroalimentaire':'Food and beverage','Distribution / logistique':'Distribution / logistics','Remontées mécaniques':'Ski lifts',
+  'Broyeur':'Crusher / mill','Élévateur':'Bucket elevator','Pont roulant, levage':'Overhead crane, hoist','Pont roulant, translation':'Overhead crane, travel','Mélangeur':'Mixer','Convoyeur / transporteur':'Conveyor','Tour de refroidissement':'Cooling tower','Pompe volumétrique':'Positive displacement pump',"Vis d'alimentation":'Feed screw','Excitatrice':'Exciter','Extrudeuse':'Extruder','Extrudeuse bi-vis':'Twin-screw extruder','Machine à papier':'Paper machine','Pulpeur':'Pulper','Laminoir':'Rolling mill','Aérateur de surface':'Surface aerator','Presse à pulpes':'Pulp press','Centrale hydro':'Hydropower plant','Silo':'Silo',
+  'Marques':'Brands','Équipements':'Equipment',
+  'Équipement / application':'Equipment / application','Marque':'Brand','Type / taille':'Type / size','Qté':'Qty','Âge (ans)':'Age (years)','Criticité A/B/C':'Criticality A/B/C',
+  'Négoce':'Trading','Révision réducteur':'Gearbox overhaul','Réparation / expertise':'Repair / assessment','Urgence en cours':'Ongoing emergency',
+  'Inspection':'Inspection',"Analyse d'huile":'Oil analysis','Contrat de service':'Service contract','Intervention sur site':'On-site intervention','Astreinte 24/7':'24/7 on-call','Formation':'Training','Arrêt programmé':'Planned shutdown',
+  'Remplacement réducteur':'Gearbox replacement','Assemblage motoréducteur':'Geared motor assembly','Assemblage réducteur':'Gearbox assembly','Équivalence autre marque':'Cross-brand equivalent',
+  'Étude / dimensionnement':'Study / sizing','Analyse de défaillance':'Failure analysis','Adaptation / retrofit':'Adaptation / retrofit',
+  'Accouplements':'Couplings','Pièces détachées':'Spare parts','Ponts roulants':'Overhead cranes','Freins':'Brakes','Pompes à huile':'Oil pumps','Groupes frigorifiques':'Cooling units',
+  'Problème / déclencheur':'Problem / trigger','Fournisseur actuel':'Current supplier','Concurrent cité':'Competitor mentioned','Échéance projet':'Project timeline',
+  'Urgent (< 1 mois)':'Urgent (< 1 month)','1 à 3 mois':'1 to 3 months','3 à 12 mois':'3 to 12 months','> 12 mois':'> 12 months','Inconnue':'Unknown',
+  'Budget':'Budget','Validé':'Approved','À valider':'To be approved','Inconnu':'Unknown','Montant estimé (€ HTVA)':'Estimated amount (€ excl. VAT)',
+  'Oui':'Yes','Non':'No',"Date de l'arrêt":'Shutdown date','Potentiel annuel':'Annual potential','10 à 50 k€':'10 to 50 k€','50 à 150 k€':'50 to 150 k€',
+  'Intérêt':'Interest','1 Aucun':'1 None','2 Curiosité':'2 Curiosity','3 Besoin identifié':'3 Need identified','4 Projet défini':'4 Defined project',"5 Demande d'offre":'5 Quote request',
+  'Priorité':'Priority','A · relance sous 48 h':'A · follow up within 48 h','B · relance sous 2 semaines':'B · follow up within 2 weeks','C · base marketing':'C · marketing database',
+  'Actions':'Actions','Envoi documentation':'Send documentation','Appel de suivi':'Follow-up call','Visite sur site':'Site visit','Inspection / diagnostic':'Inspection / diagnosis','Offre de prix':'Price quote','Démo / formation':'Demo / training','Transfert collègue':'Hand over to colleague','Aucune':'None',
+  'Responsable':'Owner','Échéance':'Due date','Documents promis':'Documents promised','Saisi CRM le':'Entered in CRM on','Notes':'Notes',
+ }
+};
+// Textes de l'interface
+const UI = {
+ fr:{appTitle:'Fiches salon',newForm:'Nouvelle fiche',list:'Liste',delete:'Supprimer',share:'Partager',finish:'Terminer',export:'Exporter / sauvegarder',settings:'Paramètres',
+  search:'Rechercher société, contact, ville, marque…',all:'Toutes',allStates:'Tout',drafts:'Brouillons',notShared:'Non partagées',
+  storeWarn:"Stockage local indisponible sur ce navigateur : les fiches seront perdues à la fermeture. Ouvrez l'application installée ou un navigateur standard.",
+  nForms:n=>`<b>${n}</b> fiche${n>1?'s':''}`,nA:n=>`<b>${n}</b> priorité A`,nDraft:n=>`<b>${n}</b> brouillon${n>1?'s':''}`,nNotShared:n=>`<b>${n}</b> non partagée${n>1?'s':''}`,
+  emptyT:"Aucune fiche pour l'instant",emptyP:"Touchez « Nouvelle fiche » pour enregistrer le premier contact du salon. Les fiches restent sur la tablette, même sans réseau.",noMatch:'Aucune fiche ne correspond à ce filtre.',
+  noCompany:'Sans nom de société',noContact:'Contact non renseigné',complete:'Complète',draft:'Brouillon',shared:'Partagée',interest:'Intérêt',
+  formNo:'fiche n°',no:'n°',salon:'Salon',form:'Fiche',created:'Créée',sharedOn:'Partagée',
+  saving:'Enregistrement…',saved:'Enregistré',saveFail:"Échec de l'enregistrement",otherPh:'Autre, préciser',
+  addEquip:'+ Ajouter un équipement',rmRow:'Supprimer la ligne',photoTake:'Photographier la carte',photoRetake:'Reprendre la photo',remove:'Retirer',photoErr:'Photo illisible, réessayez.',
+  needCompany:'Indiquez la société avant de terminer la fiche.',doneToast:'Fiche complète. Partagez-la ou passez au contact suivant.',
+  delTitle:'Supprimer cette fiche ?',delBody:'La fiche et sa photo seront retirées de la tablette. Vous pourrez annuler pendant quelques secondes.',cancel:'Annuler',delToast:'Fiche supprimée',undo:'Annuler',restored:'Fiche restaurée',
+  formTitle:'Fiche contact salon',createdOn:'Créée le',receivedBy:'reçu par',photoAttached:'Photo jointe',
+  qty:'qté',years:'ans',crit:'criticité',sharedToast:'Fiche partagée',
+  shareTitle:'Partager la fiche',shareFallback:"Le partage direct n'est pas disponible dans ce navigateur. Copiez le texte ou ouvrez un email prérempli.",close:'Fermer',copy:'Copier',openMail:"Ouvrir l'email",copied:'Texte copié',
+  expTitle:'Exporter et sauvegarder',csvT:'Tableau Excel (CSV)',csvP:n=>`une ligne par fiche, colonnes séparées par « ; », lisible dans Excel et importable dans le CRM. Porte sur les ${n} fiche${n>1?'s':''} affichée${n>1?'s':''}, dans la langue de l'interface.`,
+  shareCsv:'Partager le CSV',dlCsv:'Télécharger le CSV',bkT:'Sauvegarde complète',bkP:'fichier .json avec toutes les fiches et les photos. Sert à transférer vers une autre tablette ou à archiver.',
+  shareBk:'Partager la sauvegarde',download:'Télécharger',importBk:'Importer une sauvegarde',expShared:'Export partagé',csvDl:'CSV téléchargé',bkDl:'Sauvegarde téléchargée',
+  imported:n=>`${n} fiche${n>1?'s':''} importée${n>1?'s':''}`,importErr:'Fichier non reconnu : choisissez une sauvegarde .json de cette application.',
+  setTitle:'Paramètres du salon',salonName:'Nom du salon',dateJ:'Date',defRecu:'Reçu par (par défaut)',defMail:'Email destinataire par défaut',
+  setHelp:'Le jour (J1, J2, J3) est coché automatiquement selon la date de création. Les nouvelles fiches prennent le nom du salon affiché ici.',save:'Enregistrer',setSaved:'Paramètres enregistrés',
+  state:'État',sharedCol:'Partagée le',date:'Date',photoCol:'Photo carte',yes:'Oui',noW:'Non',footer:'MGH NV · +32 (0)2 753 00 40 · info@mgh.be · www.mgh.be',locale:'fr-BE',fileForm:'fiche',fileForms:'fiches',fileBk:'sauvegarde'},
+ nl:{appTitle:'Beursfiches',newForm:'Nieuwe fiche',list:'Lijst',delete:'Verwijderen',share:'Delen',finish:'Afronden',export:'Exporteren / back-up',settings:'Instellingen',
+  search:'Zoek bedrijf, contact, gemeente, merk…',all:'Alle',allStates:'Alles',drafts:'Concepten',notShared:'Niet gedeeld',
+  storeWarn:'Lokale opslag niet beschikbaar in deze browser: de fiches gaan verloren bij het sluiten. Open de geïnstalleerde app of een standaardbrowser.',
+  nForms:n=>`<b>${n}</b> fiche${n>1?'s':''}`,nA:n=>`<b>${n}</b> prioriteit A`,nDraft:n=>`<b>${n}</b> concept${n>1?'en':''}`,nNotShared:n=>`<b>${n}</b> niet gedeeld`,
+  emptyT:'Nog geen fiches',emptyP:'Tik op « Nieuwe fiche » om het eerste beurscontact te registreren. De fiches blijven op de tablet, ook zonder netwerk.',noMatch:'Geen fiches voor deze filter.',
+  noCompany:'Zonder bedrijfsnaam',noContact:'Geen contactpersoon',complete:'Volledig',draft:'Concept',shared:'Gedeeld',interest:'Interesse',
+  formNo:'fiche nr.',no:'nr.',salon:'Beurs',form:'Fiche',created:'Aangemaakt',sharedOn:'Gedeeld',
+  saving:'Opslaan…',saved:'Opgeslagen',saveFail:'Opslaan mislukt',otherPh:'Andere, specificeren',
+  addEquip:'+ Uitrusting toevoegen',rmRow:'Regel verwijderen',photoTake:'Visitekaartje fotograferen',photoRetake:'Nieuwe foto',remove:'Verwijderen',photoErr:'Foto onleesbaar, probeer opnieuw.',
+  needCompany:'Vul het bedrijf in voordat u de fiche afrondt.',doneToast:'Fiche volledig. Deel ze of ga naar het volgende contact.',
+  delTitle:'Deze fiche verwijderen?',delBody:'De fiche en de foto worden van de tablet verwijderd. U kunt dit enkele seconden ongedaan maken.',cancel:'Annuleren',delToast:'Fiche verwijderd',undo:'Ongedaan maken',restored:'Fiche hersteld',
+  formTitle:'Beurscontactfiche',createdOn:'Aangemaakt op',receivedBy:'ontvangen door',photoAttached:'Foto bijgevoegd',
+  qty:'aantal',years:'jaar',crit:'kritikaliteit',sharedToast:'Fiche gedeeld',
+  shareTitle:'Fiche delen',shareFallback:'Rechtstreeks delen is niet beschikbaar in deze browser. Kopieer de tekst of open een vooraf ingevulde e-mail.',close:'Sluiten',copy:'Kopiëren',openMail:'E-mail openen',copied:'Tekst gekopieerd',
+  expTitle:'Exporteren en back-up',csvT:'Excel-tabel (CSV)',csvP:n=>`één regel per fiche, kolommen gescheiden door « ; », leesbaar in Excel en importeerbaar in het CRM. Betreft de ${n} getoonde fiche${n>1?'s':''}, in de taal van de interface.`,
+  shareCsv:'CSV delen',dlCsv:'CSV downloaden',bkT:'Volledige back-up',bkP:'.json-bestand met alle fiches en foto’s. Om over te zetten naar een andere tablet of te archiveren.',
+  shareBk:'Back-up delen',download:'Downloaden',importBk:'Back-up importeren',expShared:'Export gedeeld',csvDl:'CSV gedownload',bkDl:'Back-up gedownload',
+  imported:n=>`${n} fiche${n>1?'s':''} geïmporteerd`,importErr:'Bestand niet herkend: kies een .json-back-up van deze app.',
+  setTitle:'Beursinstellingen',salonName:'Naam van de beurs',dateJ:'Datum',defRecu:'Ontvangen door (standaard)',defMail:'Standaard e-mailontvanger',
+  setHelp:'De dag (D1, D2, D3) wordt automatisch aangevinkt volgens de aanmaakdatum. Nieuwe fiches krijgen de hier vermelde beursnaam.',save:'Opslaan',setSaved:'Instellingen opgeslagen',
+  state:'Status',sharedCol:'Gedeeld op',date:'Datum',photoCol:'Foto kaartje',yes:'Ja',noW:'Nee',footer:'MGH NV · +32 (0)2 753 00 40 · info@mgh.be · www.mgh.be',locale:'nl-BE',fileForm:'fiche',fileForms:'fiches',fileBk:'backup'},
+ en:{appTitle:'Trade show forms',newForm:'New form',list:'List',delete:'Delete',share:'Share',finish:'Finish',export:'Export / backup',settings:'Settings',
+  search:'Search company, contact, city, brand…',all:'All',allStates:'All',drafts:'Drafts',notShared:'Not shared',
+  storeWarn:'Local storage is unavailable in this browser: forms will be lost when it closes. Open the installed app or a standard browser.',
+  nForms:n=>`<b>${n}</b> form${n>1?'s':''}`,nA:n=>`<b>${n}</b> priority A`,nDraft:n=>`<b>${n}</b> draft${n>1?'s':''}`,nNotShared:n=>`<b>${n}</b> not shared`,
+  emptyT:'No forms yet',emptyP:'Tap « New form » to record the first contact of the show. Forms stay on the tablet, even without a network.',noMatch:'No form matches this filter.',
+  noCompany:'No company name',noContact:'No contact entered',complete:'Complete',draft:'Draft',shared:'Shared',interest:'Interest',
+  formNo:'form no.',no:'no.',salon:'Show',form:'Form',created:'Created',sharedOn:'Shared',
+  saving:'Saving…',saved:'Saved',saveFail:'Save failed',otherPh:'Other, specify',
+  addEquip:'+ Add equipment',rmRow:'Delete row',photoTake:'Photograph business card',photoRetake:'Retake photo',remove:'Remove',photoErr:'Photo unreadable, try again.',
+  needCompany:'Enter the company before finishing the form.',doneToast:'Form complete. Share it or move on to the next contact.',
+  delTitle:'Delete this form?',delBody:'The form and its photo will be removed from the tablet. You can undo for a few seconds.',cancel:'Cancel',delToast:'Form deleted',undo:'Undo',restored:'Form restored',
+  formTitle:'Trade show contact form',createdOn:'Created on',receivedBy:'received by',photoAttached:'Photo attached',
+  qty:'qty',years:'years',crit:'criticality',sharedToast:'Form shared',
+  shareTitle:'Share the form',shareFallback:'Direct sharing is not available in this browser. Copy the text or open a prefilled email.',close:'Close',copy:'Copy',openMail:'Open email',copied:'Text copied',
+  expTitle:'Export and backup',csvT:'Excel table (CSV)',csvP:n=>`one row per form, columns separated by « ; », readable in Excel and importable into the CRM. Covers the ${n} form${n>1?'s':''} shown, in the interface language.`,
+  shareCsv:'Share CSV',dlCsv:'Download CSV',bkT:'Full backup',bkP:'.json file with all forms and photos. Use it to move to another tablet or to archive.',
+  shareBk:'Share backup',download:'Download',importBk:'Import a backup',expShared:'Export shared',csvDl:'CSV downloaded',bkDl:'Backup downloaded',
+  imported:n=>`${n} form${n>1?'s':''} imported`,importErr:'File not recognised: choose a .json backup from this app.',
+  setTitle:'Show settings',salonName:'Show name',dateJ:'Date',defRecu:'Received by (default)',defMail:'Default email recipient',
+  setHelp:'The day (D1, D2, D3) is ticked automatically from the creation date. New forms take the show name set here.',save:'Save',setSaved:'Settings saved',
+  state:'Status',sharedCol:'Shared on',date:'Date',photoCol:'Card photo',yes:'Yes',noW:'No',footer:'MGH NV · +32 (0)2 753 00 40 · info@mgh.be · www.mgh.be',locale:'en-GB',fileForm:'form',fileForms:'forms',fileBk:'backup'},
+};
+
+/* ---------- Utilitaires ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const fmtD=s=>s?s.split('-').reverse().join('/'):'';
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const slug=s=>(s||'fiche').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40)||'fiche';
+
+/* ---------- Paramètres ---------- */
+const DEF_SETTINGS={salon:'SEPEM Douai 2026',j1:'',j2:'',j3:'',recuPar:'',email:'',counter:0,lang:'fr',recName:'HiNoter',recLink:'com.recordpro.audiorecord'};
+function loadSettings(){try{return Object.assign({},DEF_SETTINGS,JSON.parse(localStorage.getItem('mgh-settings')||'{}'))}catch(e){return {...DEF_SETTINGS}}}
+function saveSettings(){try{localStorage.setItem('mgh-settings',JSON.stringify(S))}catch(e){}}
+let S=loadSettings();
+if(!UI[S.lang])S.lang='fr';
+
+/* ---------- Langue ---------- */
+const t=k=>UI[S.lang][k]??UI.fr[k];
+const tr=s=>S.lang==='fr'?s:(DICT[S.lang][s]??s);
+const fmtDT=x=>x?new Date(x).toLocaleString(t('locale'),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+function applyStatic(){
+  document.documentElement.lang=S.lang;
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-aria]').forEach(e=>{e.setAttribute('aria-label',t(e.dataset.i18nAria));e.title=t(e.dataset.i18nAria)});
+  document.querySelectorAll('[data-lang]').forEach(b=>{const on=b.dataset.lang===S.lang;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+  $('#bDel').setAttribute('aria-label',t('delete'));
+}
+function setLang(l){
+  if(!UI[l]||l===S.lang)return;
+  S.lang=l;saveSettings();applyStatic();$('#toast').hidden=true;
+  if(cur){renderForm();setHeader('form')}else{setHeader('list');renderList()}
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+
+/* ---------- Toast avec action ---------- */
+let toastT;
+function toast(m,action){
+  const el=$('#toast'),b=$('#toastBtn');$('#toastMsg').textContent=m;
+  if(action){b.textContent=action.label;b.hidden=false;b.onclick=()=>{el.hidden=true;clearTimeout(toastT);action.run()}}else{b.hidden=true;b.onclick=null}
+  el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,action?7000:2600);
+}
+
+/* ---------- Stockage (IndexedDB, repli mémoire) ---------- */
+let db=null; const mem=new Map();
+function openDB(){return new Promise(res=>{try{const r=indexedDB.open('mgh-fiches',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('fiches',{keyPath:'id'});
+  r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>res()}catch(e){res()}})}
+function tx(mode){return db.transaction('fiches',mode).objectStore('fiches')}
+function dbAll(){if(!db)return Promise.resolve([...mem.values()]);return new Promise((res,rej)=>{const r=tx('readonly').getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+function dbPut(o){if(!db){mem.set(o.id,o);return Promise.resolve()}return new Promise((res,rej)=>{const r=tx('readwrite').put(o);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function dbDel(id){if(!db){mem.delete(id);return Promise.resolve()}return new Promise((res,rej)=>{const r=tx('readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+
+/* ---------- État ---------- */
+let fiches=[], cur=null, filt={q:'',prio:'',etat:''}, saveT=null;
+
+function newFiche(){
+  S.counter=(S.counter||0)+1; saveSettings();
+  const d=todayISO(); let jour='';
+  if(S.j1===d)jour='J1'; else if(S.j2===d)jour='J2'; else if(S.j3===d)jour='J3';
+  return {id:uid(),no:S.counter,salon:S.salon,createdAt:Date.now(),updatedAt:Date.now(),done:false,sharedAt:null,
+    recuPar:S.recuPar||'',jour,parc:[{}],secteurs:[],applications:[],marques:[],role:[],repair:[],service:[],replace:[],engineering:[],negoce:[],actions:[]};
+}
+const prioLetter=f=>(f.priorite||'').charAt(0);
+const interetN=f=>parseInt(f.interet)||0;
+
+/* ---------- Vues ---------- */
+function setHeader(view){
+  if(view==='list'){$('#hTitle').textContent=t('appTitle');$('#hSub').textContent=S.salon}
+  else{$('#hTitle').textContent=cur.societe||t('newForm');$('#hSub').textContent=`${cur.salon} · ${t('formNo')} ${cur.no}`}
+}
+function show(view){
+  const l=view==='list';
+  $('#vList').hidden=!l;$('#barList').hidden=!l;$('#vForm').hidden=l;$('#barForm').hidden=l;
+  setHeader(view);window.scrollTo(0,0);
+}
+async function refreshList(){fiches=(await dbAll()).sort((a,b)=>b.createdAt-a.createdAt);renderList()}
+function filtered(){
+  const q=filt.q.trim().toLowerCase();
+  return fiches.filter(f=>{
+    if(filt.prio&&prioLetter(f)!==filt.prio)return false;
+    if(filt.etat==='draft'&&f.done)return false;
+    if(filt.etat==='notshared'&&f.sharedAt)return false;
+    if(!q)return true;
+    return [f.societe,f.nom,f.cpVille,f.site,f.fonction,f.mail,(f.marques||[]).join(' '),f.marqueAutre,f.notes,f.recuPar,f.transcript].join(' ').toLowerCase().includes(q);
+  });
+}
+const TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
+function renderList(){
+  const list=filtered();
+  const n=fiches.length,a=fiches.filter(f=>prioLetter(f)==='A').length,dr=fiches.filter(f=>!f.done).length,ns=fiches.filter(f=>!f.sharedAt).length;
+  $('#stats').innerHTML=`<span>${t('nForms')(n)}</span><span>${t('nA')(a)}</span><span>${t('nDraft')(dr)}</span><span>${t('nNotShared')(ns)}</span>`;
+  if(!fiches.length){$('#cards').innerHTML=`<div class="empty"><b>${t('emptyT')}</b>${t('emptyP')}</div>`;return}
+  if(!list.length){$('#cards').innerHTML=`<div class="empty">${t('noMatch')}</div>`;return}
+  $('#cards').innerHTML=list.map(f=>{
+    const p=prioLetter(f),i=interetN(f);
+    const dots=`<span class="dots" title="${t('interest')} ${i}/5">${[1,2,3,4,5].map(k=>`<i class="${k<=i?'on':''}"></i>`).join('')}</span>`;
+    return `<div class="card ${p?'p'+p:''}">
+      <button class="open" data-open="${f.id}">
+        <div class="l1"><span class="soc">${esc(f.societe||t('noCompany'))}</span><span class="no">${t('no')} ${f.no}</span></div>
+        <div class="who">${esc([f.nom,f.fonction].filter(Boolean).join(' · ')||t('noContact'))}${f.cpVille?' · '+esc(f.cpVille):''}</div>
+        <div class="l3">${p?`<span class="pill p${p}">${p}</span>`:''}${dots}
+          <span class="pill ${f.done?'done':'draft'}">${f.done?t('complete'):t('draft')}</span>
+          ${f.sharedAt?`<span class="pill shared">${t('shared')}</span>`:''}
+          <span>${esc(f.recuPar||'')}</span><span>${fmtDT(f.createdAt)}</span></div>
+      </button>
+      <button class="del" data-del="${f.id}" aria-label="${t('delete')} ${esc(f.societe||'')}" title="${t('delete')}">${TRASH}</button>
+    </div>`}).join('');
+}
+
+/* ---------- Rendu de la fiche ---------- */
+function chipGroup(fd,val){
+  const one=fd.y==='one', sel=one?[val]:(val||[]);
+  return `<div class="chips ${one?'one':''}" role="group" aria-label="${esc(tr(fd.l||''))}" data-k="${fd.k}" data-y="${fd.y}">${fd.o.map(o=>
+    `<button type="button" class="chip ${sel.includes(o)?'on':''}" data-v="${esc(o)}" aria-pressed="${sel.includes(o)}">${esc(tr(o))}</button>`).join('')}</div>`
+   +(fd.other?`<input class="other" id="f_${fd.other}" data-k="${fd.other}" placeholder="${t('otherPh')}" value="${esc(cur[fd.other])}">`:'');
+}
+function parcTable(){
+  const rows=(cur.parc&&cur.parc.length?cur.parc:[{}]);
+  return `<div class="parcwrap"><table class="parc"><thead><tr>${PARC_COLS.map(c=>`<th>${esc(tr(c[1]))}</th>`).join('')}<th></th></tr></thead><tbody>${
+    rows.map((r,i)=>`<tr>${PARC_COLS.map(([k,l])=>`<td><input data-parc="${i}" data-f="${k}" value="${esc(r[k])}" ${['qte','kw','age'].includes(k)?'inputmode="decimal"':''} aria-label="${esc(tr(l))} ${i+1}"></td>`).join('')}<td><button type="button" class="rm" data-rmparc="${i}" aria-label="${t('rmRow')}">×</button></td></tr>`).join('')
+  }</tbody></table></div><div style="margin-top:8px"><button type="button" class="btn" id="addParc">${t('addEquip')}</button></div>`;
+}
+function photoField(){
+  return `<div class="photo">${cur.carte?`<img src="${cur.carte}" alt="${esc(tr('Carte de visite'))}">`:''}
+    <label class="btn" for="camIn">${cur.carte?t('photoRetake'):t('photoTake')}</label>
+    <input id="camIn" type="file" accept="image/*" capture="environment" hidden>
+    ${cur.carte?`<button type="button" class="btn danger" id="rmPhoto">${t('remove')}</button>`:''}</div>`;
+}
+function renderFormInfo(){
+  if(cur)$('#fInfo').innerHTML=`<span>${t('salon')} <b>${esc(cur.salon)}</b></span><span>${t('form')} <b>${t('no')} ${cur.no}</b></span><span>${t('created')} <b>${fmtDT(cur.createdAt)}</b></span>${cur.sharedAt?`<span>${t('sharedOn')} <b>${fmtDT(cur.sharedAt)}</b></span>`:''}`;
+}
+function renderForm(){
+  renderFormInfo();
+  const y=window.scrollY;
+  $('#form').innerHTML=SECTIONS.map(s=>`<div class="sec"><h2>${esc(tr(s.t))}</h2><div class="body">${s.f.map(fd=>{
+    const L=esc(tr(fd.l||''))+(fd.req?' *':'');
+    const v=cur[fd.k];
+    if(fd.y==='text')return `<div class="fld" id="w_${fd.k}"><label for="f_${fd.k}">${L}</label><input id="f_${fd.k}" data-k="${fd.k}" value="${esc(v)}" ${fd.im?`inputmode="${fd.im}"`:''} ${fd.im==='email'?'type="email" autocapitalize="off"':''} ${fd.im==='tel'?'type="tel"':''}></div>`;
+    if(fd.y==='date')return `<div class="fld"><label for="f_${fd.k}">${L}</label><input type="date" id="f_${fd.k}" data-k="${fd.k}" value="${esc(v)}"></div>`;
+    if(fd.y==='area')return `<div class="fld full">${fd.hideL?'':`<label for="f_${fd.k}">${L}</label>`}<textarea id="f_${fd.k}" data-k="${fd.k}" rows="${fd.rows||3}" ${fd.hideL?`aria-label="${L}"`:''}>${esc(v)}</textarea></div>`;
+    if(fd.y==='one'||fd.y==='many')return `<div class="fld full">${fd.hideL?'':`<span class="${fd.sub?'sub':'lbl'}">${L}</span>`}${chipGroup(fd,v)}</div>`;
+    if(fd.y==='parc')return `<div class="fld full"><span class="lbl">${L}</span>${parcTable()}</div>`;
+    if(fd.y==='dict')return dictField();
+    if(fd.y==='photo')return `<div class="fld full"><span class="lbl">${L}</span><div id="photoBox">${photoField()}</div></div>`;
+    return '';
+  }).join('')}</div></div>`).join('');
+  updateFormButtons();
+  window.scrollTo(0,y);
+}
+function updateFormButtons(){$('#bDone').hidden=!!cur.done;$('#bNext').hidden=!cur.done;setHeader('form')}
+
+/* ---------- Saisie ---------- */
+function touch(){cur.updatedAt=Date.now();$('#saveState').textContent=t('saving');clearTimeout(saveT);saveT=setTimeout(persist,350)}
+async function persist(){clearTimeout(saveT);if(!cur)return;try{await dbPut(cur);$('#saveState').textContent=t('saved')}catch(e){$('#saveState').textContent=t('saveFail')}}
+
+$('#form').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');
+  if(c){const g=c.parentElement,k=g.dataset.k,v=c.dataset.v;
+    if(g.dataset.y==='one'){cur[k]=cur[k]===v?'':v;g.querySelectorAll('.chip').forEach(b=>{const on=b.dataset.v===cur[k];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+    else{const a=cur[k]=cur[k]||[];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0)}
+    touch();return}
+  if(e.target.id==='addParc'){cur.parc=cur.parc||[];cur.parc.push({});rerenderParc();touch();return}
+  const rm=e.target.closest('[data-rmparc]');
+  if(rm){cur.parc.splice(+rm.dataset.rmparc,1);if(!cur.parc.length)cur.parc=[{}];rerenderParc();touch();return}
+  if(e.target.id==='rmPhoto'){cur.carte='';$('#photoBox').innerHTML=photoField();touch()}
+});
+function rerenderParc(){const w=$('.parcwrap').parentElement;w.innerHTML=`<span class="lbl">${esc(tr('Équipements'))}</span>`+parcTable()}
+$('#form').addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.parc!==undefined){cur.parc[+el.dataset.parc][el.dataset.f]=el.value;touch();return}
+  if(el.dataset.k){cur[el.dataset.k]=el.value;if(el.dataset.k==='societe'){$('#hTitle').textContent=el.value||t('newForm');$('#w_societe').classList.remove('err');const m=$('#w_societe .errmsg');if(m)m.remove()}touch()}
+});
+$('#form').addEventListener('change',async e=>{
+  if(e.target.id!=='camIn'||!e.target.files[0])return;
+  try{cur.carte=await compress(e.target.files[0]);$('#photoBox').innerHTML=photoField();touch()}catch(err){toast(t('photoErr'))}
+});
+function compress(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{const m=1400,s=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.72))};
+  img.onerror=rej;img.src=u})}
+
+/* ---------- Navigation ---------- */
+function openFiche(id){cur=fiches.find(f=>f.id===id);if(!cur)return;S.lastId=cur.id;saveSettings();$('#saveState').textContent='';show('form');renderForm()}
+async function createAndOpen(){stopRec();if(cur)await persist();cur=newFiche();S.lastId=cur.id;saveSettings();await dbPut(cur);fiches.unshift(cur);$('#saveState').textContent='';show('form');renderForm();setTimeout(()=>{const i=$('#f_societe');if(i)i.focus()},50)}
+async function backToList(){stopRec();await persist();cur=null;show('list');refreshList()}
+
+$('#bNew').onclick=createAndOpen;
+$('#bNext').onclick=createAndOpen;
+$('#bBack').onclick=backToList;
+$('#cards').addEventListener('click',e=>{
+  const d=e.target.closest('[data-del]');if(d){askDelete(fiches.find(f=>f.id===d.dataset.del));return}
+  const b=e.target.closest('[data-open]');if(b)openFiche(b.dataset.open);
+});
+$('#q').addEventListener('input',e=>{filt.q=e.target.value;renderList()});
+document.querySelectorAll('[data-prio]').forEach(b=>b.onclick=()=>{filt.prio=b.dataset.prio;document.querySelectorAll('[data-prio]').forEach(x=>x.classList.toggle('on',x===b));renderList()});
+document.querySelectorAll('[data-etat]').forEach(b=>b.onclick=()=>{filt.etat=b.dataset.etat;document.querySelectorAll('[data-etat]').forEach(x=>x.classList.toggle('on',x===b));renderList()});
+
+$('#bDone').onclick=async()=>{
+  if(!(cur.societe||'').trim()){const w=$('#w_societe');w.classList.add('err');if(!w.querySelector('.errmsg'))w.insertAdjacentHTML('beforeend',`<span class="errmsg">${t('needCompany')}</span>`);w.scrollIntoView({block:'center'});$('#f_societe').focus();return}
+  cur.done=true;await persist();updateFormButtons();toast(t('doneToast'));
+};
+
+/* ---------- Suppression avec annulation ---------- */
+function askDelete(f){
+  if(!f)return;
+  dialog(`<h3>${t('delTitle')}</h3><p><b>${esc(f.societe||t('noCompany'))}</b> · ${t('no')} ${f.no}${f.nom?' · '+esc(f.nom):''}</p><p>${t('delBody')}</p>
+  <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn dangerfill" id="okDel">${t('delete')}</button></div>`,
+  ()=>{$('#okDel').onclick=()=>doDelete(f)});
+}
+async function doDelete(f){
+  const copy=JSON.parse(JSON.stringify(f));
+  if(cur&&cur.id===f.id){stopRec();clearTimeout(saveT);cur=null}
+  await dbDel(f.id);closeDlg();show('list');await refreshList();
+  toast(t('delToast'),{label:t('undo'),run:async()=>{await dbPut(copy);await refreshList();toast(t('restored'))}});
+}
+$('#bDel').onclick=()=>askDelete(cur);
+
+/* ---------- Résumé, CSV, impression ---------- */
+function valText(fd,f){const v=f[fd.k];
+  if(fd.y==='many'){const a=(v||[]).map(tr);if(fd.other&&f[fd.other])a.push(f[fd.other]);return a.join(', ')}
+  if(fd.y==='one')return v?tr(v):'';
+  if(fd.y==='date')return fmtD(v);
+  if(fd.y==='parc'){const F={equip:x=>x,marque:x=>x,type:x=>x,qte:x=>t('qty')+' '+x,kw:x=>x+' kW',age:x=>x+' '+t('years'),crit:x=>t('crit')+' '+x};
+    return (v||[]).filter(r=>Object.values(r).some(x=>x)).map(r=>PARC_COLS.map(([k])=>r[k]?F[k](r[k]):'').filter(Boolean).join(' · ')).join(' | ')}
+  if(fd.y==='photo')return v?t('photoAttached'):'';
+  return v||'';
+}
+function summary(f){
+  const L=[`${t('formTitle').toUpperCase()} · ${f.salon} · ${t('no')} ${f.no}`,`${t('createdOn')} ${fmtDT(f.createdAt)}`,''];
+  [...SECTIONS.slice(1),SECTIONS[0]].forEach(s=>{const rows=s.f.map(fd=>[tr(fd.l),valText(fd,f)]).filter(r=>r[1]);
+    if(rows.length){L.push(tr(s.t).toUpperCase());rows.forEach(([l,v])=>L.push(`${l} : ${v}`));L.push('')}});
+  L.push(t('footer'));
+  return L.join('\n');
+}
+function csvOf(list){
+  const flds=[...FIELDS.filter(fd=>fd.y!=='photo'&&fd.y!=='dict'),...FIELDS.filter(fd=>fd.y==='dict')];
+  const head=[{fr:'N°',nl:'Nr.',en:'No.'}[S.lang],t('salon'),t('date'),t('state'),t('sharedCol')].concat(flds.map(fd=>tr(fd.l)),[t('photoCol')]);
+  const q=v=>{v=String(v??'');return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const rows=list.map(f=>[f.no,f.salon,fmtDT(f.createdAt),f.done?t('complete'):t('draft'),fmtDT(f.sharedAt)]
+    .concat(flds.map(fd=>valText(fd,f).replace(/\n/g,' ')),[f.carte?t('yes'):t('noW')]));
+  return '﻿'+[head,...rows].map(r=>r.map(q).join(';')).join('\r\n');
+}
+const FOOT='MGH NV · Rittwegerlaan 2B, B-1830 Machelen · +32 (0)2 753 00 40 · info@mgh.be · www.mgh.be · BE 0477.997.984';
+function ficheHTML(f){
+  return `<div class="hd"><img src="logo.png" alt="MGH"><span>${esc(f.salon)} · ${t('formNo')} ${f.no}</span></div><h1>${t('formTitle')} · ${esc(f.societe||t('noCompany'))}</h1>
+  <div class="meta">${esc(f.salon)} · ${t('formNo')} ${f.no} · ${fmtDT(f.createdAt)}${f.recuPar?` · ${t('receivedBy')} ${esc(f.recuPar)}`:''}</div>
+  ${[...SECTIONS.slice(1),SECTIONS[0]].map(s=>{const rows=s.f.filter(fd=>fd.y!=='photo').map(fd=>[tr(fd.l),valText(fd,f)]).filter(r=>r[1]);
+    return rows.length?`<h2>${esc(tr(s.t))}</h2><table>${rows.map(r=>`<tr><td class="k">${esc(r[0])}</td><td>${esc(r[1]).replace(/\n/g,'<br>')}</td></tr>`).join('')}</table>`:''}).join('')}
+  ${f.carte?`<h2>${esc(tr('Carte de visite'))}</h2><img class="carte" src="${f.carte}" alt="">`:''}
+  <div class="ft">${FOOT}</div>`;
+}
+function runPrint(html,title){
+  $('#print').innerHTML=html;
+  const old=document.title;document.title=title;
+  const imgs=[...$('#print').querySelectorAll('img')].map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=i.onerror=r}));
+  Promise.all(imgs).then(()=>setTimeout(()=>{window.print();document.title=old},80));
+}
+function printFiche(f){runPrint(ficheHTML(f),`MGH_${t('fileForm')}_${f.no}_${slug(f.societe)}`)}
+function printAll(list){
+  if(!list.length){toast(t('noMatch'));return}
+  list=[...list].sort((a,b)=>a.no-b.no);
+  const pc={A:0,B:0,C:0,'':0};list.forEach(f=>pc[prioLetter(f)]++);
+  const head=[t('no'),tr('Société'),tr('Nom, prénom'),tr('CP / Ville'),tr('Priorité'),tr('Intérêt'),tr('Échéance projet'),tr('Actions')];
+  const recap=`<div class="cover"><div class="hd"><img src="logo.png" alt="MGH"><span>${esc(S.salon)}</span></div>
+   <h1>${t('recapTitle')} · ${esc(S.salon)}</h1>
+   <div class="meta">${t('generated')} ${fmtDT(Date.now())} · ${t('nForms')(list.length).replace(/<\/?b>/g,'')} · A ${pc.A} · B ${pc.B} · C ${pc.C}</div>
+   <table class="recap"><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${list.map(f=>`<tr>
+     <td>${f.no}</td><td><b>${esc(f.societe||t('noCompany'))}</b></td><td>${esc([f.nom,f.fonction].filter(Boolean).join(', '))}</td><td>${esc(f.cpVille||'')}</td>
+     <td class="c">${prioLetter(f)}</td><td class="c">${interetN(f)||''}</td><td>${esc(f.echeance?tr(f.echeance):'')}</td><td>${esc((f.actions||[]).map(tr).join(', '))}</td></tr>`).join('')}</tbody></table>
+   <div class="ft">${FOOT}</div></div>`;
+  runPrint(recap+list.map(f=>`<div class="pg">${ficheHTML(f)}</div>`).join(''),`MGH_${t('fileForms')}_${slug(S.salon)}_${todayISO()}`);
+}
+$('#bPrint').onclick=async()=>{await persist();printFiche(cur)};
+
+$('#bPdfAll').onclick=()=>printAll(filtered());
+Object.assign(UI.fr,{pdfAll:'PDF de toutes les fiches',pdfAllP:n=>`récapitulatif des contacts puis une page par fiche, avec photo de la carte. Porte sur les ${n} fiche${n>1?'s':''} affichée${n>1?'s':''} (filtres appliqués). Dans la fenêtre d'impression, choisissez « Enregistrer au format PDF ».`,recapTitle:'Récapitulatif des contacts',generated:'Édité le'});
+Object.assign(UI.nl,{pdfAll:'PDF van alle fiches',pdfAllP:n=>`overzicht van de contacten en daarna één pagina per fiche, met foto van het kaartje. Betreft de ${n} getoonde fiche${n>1?'s':''} (filters toegepast). Kies in het afdrukvenster « Opslaan als PDF ».`,recapTitle:'Overzicht van de contacten',generated:'Aangemaakt op'});
+Object.assign(UI.en,{pdfAll:'PDF of all forms',pdfAllP:n=>`contact summary followed by one page per form, with the card photo. Covers the ${n} form${n>1?'s':''} shown (filters applied). In the print window, choose « Save as PDF ».`,recapTitle:'Contact summary',generated:'Generated on'});
+
+/* ---------- Partage ---------- */
+function dataURLtoFile(d,name){const [h,b]=d.split(',');const bin=atob(b);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new File([u],name,{type:h.match(/:(.*?);/)[1]})}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+async function tryShare(data){
+  try{ if(data.files&&navigator.canShare&&navigator.canShare({files:data.files})){await navigator.share(data);return 'ok'}
+       if(navigator.share){const {files,...rest}=data;await navigator.share(rest);return 'ok'} }
+  catch(e){if(e&&e.name==='AbortError')return 'abort'}
+  return 'none';
+}
+async function shareFiche(f){
+  await persist();
+  const name=`MGH_${t('fileForm')}_${f.no}_${slug(f.societe)}`;
+  const files=[new File([csvOf([f])],name+'.csv',{type:'text/csv'})];
+  if(f.carte)files.push(dataURLtoFile(f.carte,name+'_card.jpg'));
+  const text=summary(f);
+  const r=await tryShare({title:`${t('formTitle')} · ${f.societe||''}`,text,files});
+  if(r==='ok'){f.sharedAt=Date.now();await dbPut(f);if(cur===f)renderFormInfo();toast(t('sharedToast'));return}
+  if(r==='abort')return;
+  fallbackShare(f,text);
+}
+function fallbackShare(f,text){
+  const subj=`${t('formTitle')} ${f.salon} · ${f.societe||''}`;
+  const mail=`mailto:${encodeURIComponent(S.email||'')}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(text.slice(0,1800))}`;
+  dialog(`<h3>${t('shareTitle')}</h3><p>${t('shareFallback')}</p><pre id="shTxt">${esc(text)}</pre>
+  <div class="row"><button class="btn" data-close>${t('close')}</button><button class="btn" id="cpy">${t('copy')}</button><a class="btn pri" href="${mail}" id="mailA">${t('openMail')}</a></div>`,
+  ()=>{$('#cpy').onclick=async()=>{try{await navigator.clipboard.writeText(text);toast(t('copied'))}catch(e){const r=document.createRange();r.selectNodeContents($('#shTxt'));getSelection().removeAllRanges();getSelection().addRange(r)}};
+       $('#mailA').onclick=async()=>{f.sharedAt=Date.now();await dbPut(f);renderFormInfo()}});
+}
+$('#bShare').onclick=()=>shareFiche(cur);
+
+/* ---------- Export / sauvegarde ---------- */
+$('#bMore').onclick=()=>{
+  const list=filtered();
+  dialog(`<h3>${t('expTitle')}</h3>
+   <p><b>${t('csvT')}</b> : ${t('csvP')(list.length)}</p>
+   <div class="row" style="justify-content:flex-start;margin:0 0 14px"><button class="btn pri" id="xShare">${t('shareCsv')}</button><button class="btn" id="xDl">${t('dlCsv')}</button></div>
+   <p><b>${t('pdfAll')}</b> : ${t('pdfAllP')(list.length)}</p>
+   <div class="row" style="justify-content:flex-start;margin:0 0 14px"><button class="btn pri" id="xPdf">${t('pdfAll')}</button></div>
+   <p><b>${t('bkT')}</b> : ${t('bkP')}</p>
+   <div class="row" style="justify-content:flex-start;margin:0 0 6px"><button class="btn" id="bkShare">${t('shareBk')}</button><button class="btn" id="bkDl">${t('download')}</button>
+   <label class="btn" for="impIn">${t('importBk')}</label><input id="impIn" type="file" accept=".json,application/json" hidden></div>
+   <div class="row"><button class="btn" data-close>${t('close')}</button></div>`,()=>{
+    const stamp=todayISO();
+    const csvFile=()=>new File([csvOf(list)],`MGH_${t('fileForms')}_${slug(S.salon)}_${stamp}.csv`,{type:'text/csv'});
+    const bkFile=()=>new File([JSON.stringify({app:'mgh-fiche-salon',v:1,exportedAt:Date.now(),fiches})],`MGH_${t('fileBk')}_${slug(S.salon)}_${stamp}.json`,{type:'application/json'});
+    $('#xShare').onclick=async()=>{const r=await tryShare({title:t('appTitle'),text:`${t('appTitle')} · ${S.salon}`,files:[csvFile()]});
+      if(r==='ok'){const now=Date.now();for(const f of list){f.sharedAt=f.sharedAt||now;await dbPut(f)}closeDlg();refreshList();toast(t('expShared'))}
+      else if(r==='none'){const f=csvFile();download(f,f.name)}};
+    $('#xPdf').onclick=()=>{closeDlg();printAll(list)};
+    $('#xDl').onclick=()=>{const f=csvFile();download(f,f.name);toast(t('csvDl'))};
+    $('#bkShare').onclick=async()=>{const r=await tryShare({title:t('bkT'),files:[bkFile()]});if(r==='none'){const f=bkFile();download(f,f.name)}};
+    $('#bkDl').onclick=()=>{const f=bkFile();download(f,f.name);toast(t('bkDl'))};
+    $('#impIn').onchange=async e=>{const file=e.target.files[0];if(!file)return;
+      try{const d=JSON.parse(await file.text());if(!Array.isArray(d.fiches))throw 0;let n=0;
+        for(const f of d.fiches){if(f&&f.id&&!fiches.some(x=>x.id===f.id)){await dbPut(f);n++}}
+        closeDlg();await refreshList();toast(t('imported')(n))}
+      catch(err){toast(t('importErr'))}};
+  });
+};
+
+/* ---------- Paramètres ---------- */
+$('#bSettings').onclick=()=>dialog(`<h3>${t('setTitle')}</h3>
+  <div class="grid">
+   <div class="fld full"><label for="sSalon">${t('salonName')}</label><input id="sSalon" value="${esc(S.salon)}"></div>
+   <div class="fld"><label for="sJ1">${t('dateJ')} ${tr('J1')}</label><input id="sJ1" type="date" value="${esc(S.j1)}"></div>
+   <div class="fld"><label for="sJ2">${t('dateJ')} ${tr('J2')}</label><input id="sJ2" type="date" value="${esc(S.j2)}"></div>
+   <div class="fld"><label for="sJ3">${t('dateJ')} ${tr('J3')}</label><input id="sJ3" type="date" value="${esc(S.j3)}"></div>
+   <div class="fld"><label for="sRecu">${t('defRecu')}</label><input id="sRecu" value="${esc(S.recuPar)}" placeholder="DM, LM, HH, JD, LMA"></div>
+   <div class="fld full"><label for="sMail">${t('defMail')}</label><input id="sMail" type="email" value="${esc(S.email)}" placeholder="ventes@mgh.be"></div>
+   <div class="fld"><label for="sRecName">${t('recName')}</label><input id="sRecName" value="${esc(S.recName||'')}"></div>
+   <div class="fld"><label for="sRecLink">${t('recLink')}</label><input id="sRecLink" value="${esc(S.recLink||'')}" autocapitalize="off" placeholder="com.editeur.application"></div>
+   <p class="full" style="margin:0;color:var(--muted);font-size:13px">${t('recHelp')}</p>
+  </div>
+  <p style="margin-top:12px;color:var(--muted);font-size:14px">${t('setHelp')}</p>
+  <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn pri" id="sOk">${t('save')}</button></div>`,
+  ()=>{$('#sOk').onclick=()=>{S.salon=$('#sSalon').value.trim()||DEF_SETTINGS.salon;S.j1=$('#sJ1').value;S.j2=$('#sJ2').value;S.j3=$('#sJ3').value;
+    S.recuPar=$('#sRecu').value.trim().toUpperCase();S.email=$('#sMail').value.trim();S.recName=$('#sRecName').value.trim();S.recLink=$('#sRecLink').value.trim();saveSettings();if(cur)renderForm();closeDlg();if(!cur)setHeader('list');toast(t('setSaved'))}});
+
+/* ---------- Dialogues ---------- */
+function dialog(html,bind){$('#dlg').innerHTML=html;$('#ov').hidden=false;$('#dlg').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeDlg);bind&&bind()}
+function closeDlg(){$('#ov').hidden=true;$('#dlg').innerHTML=''}
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeDlg()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#ov').hidden)closeDlg()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopRec();if(cur)persist()}});
+
+/* ---------- Dictée, réception de texte et analyse ---------- */
+Object.assign(DICT.nl,{'Dictée et transcription':'Dictaat en transcriptie','Transcription':'Transcriptie'});
+Object.assign(DICT.en,{'Dictée et transcription':'Dictation and transcript','Transcription':'Transcript'});
+Object.assign(UI.fr,{dictStart:'Dicter',dictStop:'Arrêter',listening:'Écoute en cours…',analyze:'Remplir la fiche depuis le texte',
+  dictHelp:"Dictez le résumé de l'entretien ou collez la transcription d'une autre application. L'analyse propose des valeurs à valider avant de les reporter dans la fiche. Informez votre interlocuteur avant d'enregistrer la conversation.",
+  transcriptPh:'Texte dicté ou collé…',openRec:n=>`Ouvrir ${n}`,spoken:'Langue parlée',
+  noSR:"La dictée vocale n'est pas disponible dans ce navigateur. Utilisez Chrome, ou collez une transcription.",micDenied:"Accès au micro refusé. Autorisez le micro pour cette application dans les réglages de Chrome.",recNet:'La dictée demande une connexion internet. Le texte déjà dicté est conservé.',
+  noText:'Aucun texte à analyser.',nothingFound:'Aucune information reconnue dans le texte. Complétez la fiche manuellement.',
+  reviewTitle:'Valeurs détectées',reviewHelp:"Cochez les valeurs à reporter. Un champ déjà rempli n'est remplacé que si vous le cochez.",current:'actuel',apply:'Reporter dans la fiche',applied:n=>`${n} champ${n>1?'s':''} complété${n>1?'s':''}`,
+  recvTitle:'Texte reçu',recvHelp:'Où ajouter ce texte ?',toCurrent:n=>`Fiche en cours : ${n}`,
+  recName:"Application d'enregistrement (nom)",recLink:'Lien web ou package Android de cette application',
+  recHelp:"Exemple de package : com.editeur.application. Le bouton d'ouverture apparaît dans la section Dictée. Pour renvoyer une transcription vers une fiche, utilisez « Partager » dans l'autre application puis choisissez « Fiche salon »."});
+Object.assign(UI.nl,{dictStart:'Dicteren',dictStop:'Stoppen',listening:'Luisteren…',analyze:'Fiche invullen vanuit de tekst',
+  dictHelp:'Dicteer de samenvatting van het gesprek of plak de transcriptie uit een andere app. De analyse stelt waarden voor die u valideert voordat ze in de fiche komen. Verwittig uw gesprekspartner voordat u het gesprek opneemt.',
+  transcriptPh:'Gedicteerde of geplakte tekst…',openRec:n=>`${n} openen`,spoken:'Gesproken taal',
+  noSR:'Spraakdictaat is niet beschikbaar in deze browser. Gebruik Chrome of plak een transcriptie.',micDenied:'Toegang tot de microfoon geweigerd. Sta de microfoon toe voor deze app in de Chrome-instellingen.',recNet:'Dicteren vereist een internetverbinding. De reeds gedicteerde tekst blijft bewaard.',
+  noText:'Geen tekst om te analyseren.',nothingFound:'Geen informatie herkend in de tekst. Vul de fiche manueel aan.',
+  reviewTitle:'Gevonden waarden',reviewHelp:'Vink de waarden aan die u wilt overnemen. Een reeds ingevuld veld wordt enkel vervangen als u het aanvinkt.',current:'huidig',apply:'Overnemen in de fiche',applied:n=>`${n} veld${n>1?'en':''} ingevuld`,
+  recvTitle:'Tekst ontvangen',recvHelp:'Waar wilt u deze tekst toevoegen?',toCurrent:n=>`Huidige fiche: ${n}`,
+  recName:'Opname-app (naam)',recLink:'Weblink of Android-package van deze app',
+  recHelp:'Voorbeeld van package: com.uitgever.app. De openknop verschijnt in de sectie Dictaat. Om een transcriptie naar een fiche te sturen, gebruik « Delen » in de andere app en kies « Fiche salon ».'});
+Object.assign(UI.en,{dictStart:'Dictate',dictStop:'Stop',listening:'Listening…',analyze:'Fill the form from the text',
+  dictHelp:'Dictate a summary of the conversation or paste the transcript from another app. The analysis suggests values that you confirm before they go into the form. Tell the other person before recording the conversation.',
+  transcriptPh:'Dictated or pasted text…',openRec:n=>`Open ${n}`,spoken:'Spoken language',
+  noSR:'Voice dictation is not available in this browser. Use Chrome, or paste a transcript.',micDenied:'Microphone access denied. Allow the microphone for this app in Chrome settings.',recNet:'Dictation needs an internet connection. Text already dictated is kept.',
+  noText:'No text to analyse.',nothingFound:'No information recognised in the text. Complete the form manually.',
+  reviewTitle:'Detected values',reviewHelp:'Tick the values to copy. A field that is already filled is only replaced if you tick it.',current:'current',apply:'Copy into the form',applied:n=>`${n} field${n>1?'s':''} filled`,
+  recvTitle:'Text received',recvHelp:'Where should this text go?',toCurrent:n=>`Current form: ${n}`,
+  recName:'Recording app (name)',recLink:'Web link or Android package of this app',
+  recHelp:'Package example: com.publisher.app. The open button appears in the Dictation section. To send a transcript to a form, use « Share » in the other app and choose « Fiche salon ».'});
+
+/* --- Micro (Web Speech API) --- */
+let rec=null, recOn=false, dictLang=null;
+const SR_LANG={fr:'fr-BE',nl:'nl-BE',en:'en-GB'};
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast(t('noSR'));return}
+  rec=new SR(); rec.lang=SR_LANG[dictLang||S.lang]; rec.continuous=false; rec.interimResults=true;
+  rec.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)appendTranscript(r[0].transcript);else interim+=r[0].transcript}
+    const el=$('#interim');if(el)el.textContent=interim||t('listening')};
+  rec.onerror=e=>{if(['not-allowed','service-not-allowed'].includes(e.error)){recOn=false;toast(t('micDenied'))}else if(e.error==='network'){recOn=false;toast(t('recNet'))}};
+  rec.onend=()=>{if(recOn){try{rec.start()}catch(_){recOn=false;updateRecUI()}}else updateRecUI()};
+  recOn=true; try{rec.start()}catch(_){recOn=false} updateRecUI();
+}
+function stopRec(){recOn=false;try{rec&&rec.stop()}catch(_){}rec=null;updateRecUI()}
+function updateRecUI(){const b=$('#recBtn');if(b){b.classList.toggle('on',recOn);b.setAttribute('aria-pressed',recOn);b.querySelector('span').textContent=recOn?t('dictStop'):t('dictStart')}
+  const i=$('#interim');if(i)i.textContent=recOn?t('listening'):''}
+function appendTranscript(s){if(!cur||!s)return;s=s.trim();if(!s)return;
+  const prev=(cur.transcript||'').trim();cur.transcript=prev?prev+(/[.!?]$/.test(prev)?' ':'. ')+s.charAt(0).toUpperCase()+s.slice(1):s.charAt(0).toUpperCase()+s.slice(1);
+  const ta=$('#f_transcript');if(ta){ta.value=cur.transcript;ta.scrollTop=ta.scrollHeight}touch()}
+function recHref(){const v=(S.recLink||'').trim();if(!v)return '';
+  if(/^www\./i.test(v))return 'https://'+v;
+  if(!v.includes('/')&&!v.includes(':')&&/^[a-z][\w]*(\.[\w]+)+$/i.test(v))return `intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${v};end`;
+  return v}
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg>';
+function dictField(){
+  const dl=dictLang||S.lang;
+  return `<div class="fld full dict"><p class="help">${t('dictHelp')}</p>
+   <div class="dictbar">
+     <button type="button" class="btn rec ${recOn?'on':''}" id="recBtn" aria-pressed="${recOn}">${MIC}<span>${recOn?t('dictStop'):t('dictStart')}</span></button>
+     <div class="seg" role="group" aria-label="${t('spoken')}" title="${t('spoken')}">${['fr','nl','en'].map(l=>`<button type="button" data-dl="${l}" class="${l===dl?'on':''}">${l.toUpperCase()}</button>`).join('')}</div>
+     ${S.recLink?`<a class="btn" id="recApp" href="${esc(recHref())}" target="_blank" rel="noopener">${esc(t('openRec')(S.recName||'app'))}</a>`:''}
+     <span class="interim" id="interim">${recOn?t('listening'):''}</span>
+   </div>
+   <textarea id="f_transcript" data-k="transcript" rows="4" aria-label="${esc(tr('Transcription'))}" placeholder="${t('transcriptPh')}">${esc(cur.transcript)}</textarea>
+   <div><button type="button" class="btn pri" id="anaBtn">${t('analyze')}</button></div></div>`;
+}
+$('#form').addEventListener('click',e=>{
+  if(e.target.closest('#recBtn')){recOn?stopRec():startRec();return}
+  const dl=e.target.closest('[data-dl]');if(dl){dictLang=dl.dataset.dl;document.querySelectorAll('[data-dl]').forEach(b=>b.classList.toggle('on',b===dl));if(recOn){stopRec();startRec()}return}
+  if(e.target.closest('#anaBtn')){stopRec();analyzeAndReview()}
+});
+
+/* --- Analyse du texte (hors ligne, règles FR / NL / EN) --- */
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,' ').replace(/[^a-z0-9€@.+\s-]/g,' ').replace(/\s+/g,' ').trim();
+const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const hasTerm=(nt,term)=>new RegExp('(^|[^a-z0-9])'+reEsc(term)+'([^a-z0-9]|$)').test(nt);
+const ci=s=>s.replace(/[a-zà-ÿ]/g,c=>`[${c}${c.toUpperCase()}]`).replace(/'/g,"['’]");
+const SYN={
+ 'Décideur':['decideur','directeur','directrice','directeur d usine','gerant','zaakvoerder','plant manager','beslisser','decision maker','ceo'],
+ 'Prescripteur technique':['bureau d etudes','ingenieur','engineer','studiebureau','prescripteur'],
+ 'Maintenance / utilisateur':['responsable maintenance','chef maintenance','service maintenance','technicien','onderhoudsverantwoordelijke','onderhoudsdienst','maintenance manager'],
+ 'Achats':['achats','acheteur','acheteuse','aankoop','aankoper','purchasing','buyer','procurement'],
+ 'Aciérie':['acierie','siderurgie','acier','staal','staalindustrie','steel'],'Chimie':['chimie','chimique','chemie','chemical','chemicals'],'Carrière':['carriere','carrieres','groeve','quarry','granulats'],
+ 'Cimenterie':['ciment','cimenterie','cement'],'Portuaire / containers':['port','portuaire','container','containers','haven','terminal'],'Énergie':['energie','energy','centrale electrique','power plant'],
+ 'Plasturgie':['plasturgie','plastique','kunststof','plastics'],'Papeterie':['papeterie','papier','paper','papierfabriek'],'Sucrerie':['sucrerie','sucre','suiker','sugar'],
+ "Épuration d'eau":['epuration','station d epuration','eaux usees','waterzuivering','afvalwater','wastewater','water treatment'],'Agroalimentaire':['agroalimentaire','alimentaire','voeding','food'],
+ 'Distribution / logistique':['logistique','distribution','logistiek','logistics','entrepot'],'Remontées mécaniques':['remontee','remontees mecaniques','telesiege','skilift','skiliften','ski'],
+ 'Broyeur':['broyeur','broyeurs','concasseur','moulin','breker','molen','crusher','mill'],'Élévateur':['elevateur','elevateurs','elevateur a godets','elevator','bucket elevator','jakobsladder'],
+ 'Pont roulant, levage':['levage','treuil','pont roulant','ponts roulants','rolbrug','hijswerk','heffen','hoist','overhead crane'],'Pont roulant, translation':['translation','rijbeweging','travel drive'],
+ 'Mélangeur':['melangeur','malaxeur','agitateur','menger','mixer','agitator'],'Convoyeur / transporteur':['convoyeur','transporteur','bande transporteuse','transportband','conveyor'],
+ 'Tour de refroidissement':['tour de refroidissement','tours de refroidissement','aerorefrigerant','koeltoren','cooling tower'],'Pompe volumétrique':['pompe volumetrique','verdringerpomp','displacement pump'],
+ "Vis d'alimentation":['vis d alimentation','vis sans fin','doseerschroef','schroeftransporteur','feed screw','screw conveyor'],'Excitatrice':['excitatrice','bekrachtiger','exciter'],
+ 'Extrudeuse':['extrudeuse','extrudeur','extruder'],'Extrudeuse bi-vis':['bi vis','bivis','bi-vis','twin screw','dubbelschroef'],'Machine à papier':['machine a papier','papiermachine','paper machine'],
+ 'Pulpeur':['pulpeur','pulper'],'Laminoir':['laminoir','laminage','walserij','walswerk','rolling mill'],'Aérateur de surface':['aerateur','aerateurs','beluchter','aerator'],
+ 'Presse à pulpes':['presse a pulpes','pulppers','pulp press'],'Centrale hydro':['hydro','hydroelectrique','waterkracht','hydropower'],'Silo':['silo','silos'],
+ 'Nord':['nord drivesystems','reducteur nord','reducteurs nord','moteur nord','marque nord','nord reductor','nord gear'],'SEW':['sew','sew eurodrive','sew-eurodrive'],
+ 'Révision réducteur':['revision','revisions','reviser','revisie','reviseren','overhaul','remise en etat'],'Réparation / expertise':['reparation','reparer','expertise','herstelling','herstellen','repair'],
+ 'Upgrading':['upgrade','upgrading','amelioration'],'Urgence en cours':['en panne','a l arret','urgence','panne','breakdown','emergency','stilstaan','defect'],
+ 'Inspection':['inspection','inspections','inspecter','inspectie','endoscopie'],'Condition monitoring':['condition monitoring','vibration','vibrations','analyse vibratoire','trillingen','monitoring','surveillance'],
+ "Analyse d'huile":['analyse d huile','analyse huile','analyses d huile','analyse de l huile','olieanalyse','oil analysis'],'Contrat de service':['contrat','contrat de maintenance','contrat de service','servicecontract','onderhoudscontract','service contract'],
+ 'Intervention sur site':['sur site','intervention','interventions','ter plaatse','on site','on-site'],'Astreinte 24/7':['24 7','24 sur 24','astreinte','wachtdienst','on call'],
+ 'Formation':['formation','formations','opleiding','training'],'Arrêt programmé':['arret programme','arret annuel','grand arret','geplande stilstand','shutdown'],
+ 'Remplacement réducteur':['remplacer','remplacement','vervangen','vervanging','replace','replacement'],'Assemblage motoréducteur':['motoreducteur','motoreducteurs','motorreductor','geared motor','gearmotor'],
+ 'Assemblage réducteur':['assemblage'],'Équivalence autre marque':['equivalent','equivalence','autre marque','ander merk','other brand'],
+ 'Étude / dimensionnement':['etude','dimensionnement','dimensionering','studie','sizing','calcul'],'Analyse de défaillance':['analyse de defaillance','cause racine','root cause','faalanalyse','failure analysis'],
+ 'Adaptation / retrofit':['retrofit','adaptation','modification','aanpassing'],
+ 'Accouplements':['accouplement','accouplements','koppeling','koppelingen','coupling','couplings'],'Pièces détachées':['pieces','pieces detachees','pieces de rechange','roulements','wisselstukken','reserveonderdelen','lagers','spare parts','bearings'],
+ 'Ponts roulants':['ponts roulants a acheter','nouveau pont roulant','new crane'],'MGH Breather':['breather','breathers','reniflard','reniflards','purgeur','ontluchter'],'MGH Magnet Coupling':['magnet coupling','accouplement magnetique','magneetkoppeling','magnetic coupling'],
+ 'Freins':['frein','freins','remmen','brake','brakes'],'Pompes à huile':['pompe a huile','pompes a huile','oliepomp','oliepompen','oil pump'],'Groupes frigorifiques':['groupe frigorifique','groupes frigorifiques','refroidisseur','koelgroep','chiller'],
+ 'Envoi documentation':['documentation','brochure','catalogue','fiche technique','documentatie','datasheet'],'Appel de suivi':['rappeler','rappel','appeler','telephoner','terugbellen','bellen','call back','follow up call'],
+ 'Visite sur site':['visite','venir voir','passer sur site','bezoek','langskomen','site visit'],'Inspection / diagnostic':['inspection','diagnostic','inspectie','diagnose'],
+ 'Offre de prix':['offre','offre de prix','devis','offerte','prijsofferte','quote','quotation'],'Démo / formation':['demo','demonstration','formation','opleiding','training'],'Transfert collègue':['collegue','collega','colleague'],
+};
+const AUTO_KEYS=['role','secteurs','applications','marques','repair','service','replace','engineering','negoce','actions'];
+const SKIP_OPT=new Set(['Aucune']);
+const termsFor=o=>SYN[o]||[norm(o),norm(DICT.nl[o]||''),norm(DICT.en[o]||'')].filter(Boolean);
+function capture(raw,prefixes,word){
+  const re=new RegExp('(?:'+prefixes.map(ci).join('|')+')\\s+('+word+')','u');const m=raw.match(re);
+  if(!m)return '';return m[1].replace(/\s+(de|du|des|la|le|van|der|of|en|et|and|&)$/i,'').trim();
+}
+const CAPW="[A-ZÀ-Þ0-9][\\wÀ-ÿ&'’.-]*(?:\\s+(?:[A-ZÀ-Þ0-9][\\wÀ-ÿ&'’.-]*|de|du|des|la|le|van|der|of|&)){0,4}";
+const NAMEW="[A-ZÀ-Þ][a-zà-ÿ'’-]+(?:\\s+[A-ZÀ-Þ][a-zà-ÿ'’-]+){0,2}";
+function parseText(raw){
+  raw=String(raw||'');const nt=norm(raw);const P={};
+  // E-mail écrit ou dicté
+  let m=raw.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/);
+  if(m)P.mail=m[0].toLowerCase();
+  else{m=nt.match(/([a-z0-9-]+(?:\s(?:point|punt|dot)\s[a-z0-9-]+)*)\s(?:arobase|at|apenstaartje|apestaart|@)\s([a-z0-9-]+(?:\s(?:point|punt|dot)\s[a-z0-9-]+)+)/);
+    if(m)P.mail=(m[1]+'@'+m[2]).replace(/\s(point|punt|dot)\s/g,'.').replace(/\s/g,'')}
+  // Téléphone
+  m=raw.match(/(\+\d{2}[\s.]?(?:\(0\))?[\d\s./]{8,14}\d|\b0\d[\d\s./]{7,12}\d)/);
+  if(m&&m[0].replace(/\D/g,'').length>=9)P.tel=m[0].trim();
+  // CP / Ville
+  m=raw.match(/\b(\d{4,5})\s+([A-ZÀ-Þ][a-zà-ÿ'’-]+(?:[\s-](?:sur|sous|lez|lès|en|aan|de|la|le|[A-ZÀ-Þ][a-zà-ÿ'’-]+)){0,3})/u);
+  if(m)P.cpVille=(m[1]+' '+m[2].replace(/[\s-](sur|sous|lez|lès|en|aan|de|la|le)$/,'')).trim();
+  // Société, nom, fournisseur, concurrent
+  const brands=['hansen','flender','sew','nord','rexnord','stephan'];
+  let soc=capture(raw,["société","entreprise","firme","groupe","chez","de chez","bedrijf","firma","werk bij","werkt bij","bij","works at","work at","works for","company"],CAPW);
+  if(soc&&!brands.includes(norm(soc)))P.societe=soc;
+  const nom=capture(raw,["je m'appelle","je suis","mon nom est","monsieur","madame","ik ben","ik heet","mijn naam is","meneer","mevrouw","my name is","i am","i'm"],NAMEW);
+  if(nom)P.nom=nom;
+  const fourn=capture(raw,["fournisseur actuel est","fournisseur actuel","leur fournisseur est","fournisseur est","travaillent avec","travaille avec","huidige leverancier is","leverancier is","werken met","werken samen met","current supplier is","supplier is","work with","working with"],CAPW);
+  if(fourn)P.fournisseur=fourn;
+  const conc=capture(raw,["concurrent est","concurrent","en concurrence avec","concurrent is","concurrentie van","competitor is","competitor"],CAPW);
+  if(conc)P.concurrent=conc;
+  // Fonction
+  m=raw.toLowerCase().match(/\b(responsable|directeur|directrice|chef|ing[ée]nieur|technicien|acheteur|acheteuse|g[ée]rant|plant manager|maintenance manager|manager|verantwoordelijke|onderhoudsverantwoordelijke|hoofd|aankoper|zaakvoerder|engineer|buyer|head of|director)(?:\s+(?:de\s+la|de\s+l['’]|du|des|de|van\s+de|van|of|d['’])?\s*(?!chez\b|bij\b|at\b|et\b|en\b|and\b|qui\b|die\b)[a-zà-ÿ-]{3,})?/u);
+  if(m)P.fonction=m[0].charAt(0).toUpperCase()+m[0].slice(1);
+  // Problème : phrases contenant un symptôme
+  const KW=/(panne|casse|cass[ée]|fuite|vibration|bruit|surchauffe|usure|d[ée]faut|probl[èe]me|souci|breakdown|failure|leak|noise|overheat|wear|defect|problem|storing|lek|lawaai|geluid|trilling|oververhit|slijtage|probleem|kapot)/i;
+  const sent=raw.split(/(?<=[.!?])\s+|\n+/).filter(s=>KW.test(s)).map(s=>s.trim());
+  if(sent.length)P.probleme=sent.join(' ');
+  // Choix multiples
+  const many={};
+  FIELDS.filter(fd=>AUTO_KEYS.includes(fd.k)).forEach(fd=>{const hit=fd.o.filter(o=>!SKIP_OPT.has(o)&&termsFor(o).some(tm=>tm&&hasTerm(nt,tm)));if(hit.length)many[fd.k]=hit});
+  // Choix uniques
+  if(/(urgent|urgence|au plus vite|asap|dringend|zo snel mogelijk|immediately)/.test(nt))P.echeance='Urgent (< 1 mois)';
+  else if((m=nt.match(/(\d+)\s?(mois|maand|maanden|month|months)\b/))){const n=+m[1];P.echeance=n<=3?'1 à 3 mois':n<=12?'3 à 12 mois':'> 12 mois'}
+  else if((m=nt.match(/(\d+)\s?(semaines?|weken|weeks?)\b/))&&+m[1]<=4)P.echeance='Urgent (< 1 mois)';
+  else if(/(cette annee|dans l annee|dit jaar|this year)/.test(nt))P.echeance='3 à 12 mois';
+  if(/budget (est |is )?(valide|approuve|disponible|goedgekeurd|beschikbaar|approved|available)/.test(nt))P.budget='Validé';
+  else if(/(budget (a|te|to) (valider|valideren|be approved)|pas encore de budget|geen budget|no budget)/.test(nt))P.budget='À valider';
+  if(/(arret programme|arret annuel|grand arret|geplande stilstand|jaarlijkse stilstand|planned shutdown|annual shutdown)/.test(nt))P.arret='Oui';
+  if((many.actions||[]).includes('Offre de prix'))P.interet="5 Demande d'offre";
+  // Montant
+  m=nt.match(/(\d[\d .,]*\d|\d)\s?(k€|k ?euros?|keur|€|euros?)(?![a-z])/);
+  if(m){let v=parseFloat(m[1].replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.'));if(/^k/.test(m[2]))v*=1000;if(v>0)P.montant=v.toLocaleString('fr-BE')}
+  // Puissances
+  const kw=[...nt.matchAll(/(\d+(?:[.,]\d+)?)\s?(kw|kilowatts?)\b/g)].map(x=>x[1].replace('.',','));
+  return {P,many,kw};
+}
+function analyzeAndReview(){
+  const txt=(cur.transcript||'').trim();
+  if(!txt){toast(t('noText'));return}
+  const {P,many,kw}=parseText(txt);const items=[];
+  const fd=k=>FIELDS.find(f=>f.k===k);
+  Object.entries(P).forEach(([k,v])=>{const f=fd(k);if(!f)return;const curV=cur[k];if(curV===v)return;
+    items.push({k,kind:f.y==='one'?'one':'text',val:v,label:tr(f.l),cur:curV?(f.y==='one'?tr(curV):curV):'',checked:!curV})});
+  Object.entries(many).forEach(([k,vals])=>{const nv=vals.filter(v=>!(cur[k]||[]).includes(v));if(nv.length)items.push({k,kind:'many',val:nv,label:tr(fd(k).l),cur:'',checked:true})});
+  if(kw.length){const have=(cur.parc||[]).map(r=>r.kw).filter(Boolean);const nk=kw.filter(x=>!have.includes(x));if(nk.length)items.push({k:'parc',kind:'parc',val:nk,label:tr('Équipements')+' · P (kW)',cur:'',checked:true})}
+  if(!items.length){toast(t('nothingFound'));return}
+  dialog(`<h3>${t('reviewTitle')}</h3><p>${t('reviewHelp')}</p><div class="rv">${items.map((it,i)=>`<div class="it">
+    <input type="checkbox" id="rv_${i}" ${it.checked?'checked':''}><label for="rv_${i}" class="k">${esc(it.label)}</label>
+    <div class="v">${it.kind==='text'?(it.k==='probleme'?`<textarea id="rvv_${i}" rows="3" aria-label="${esc(it.label)}" style="width:100%;border:1px solid var(--line);border-radius:4px;padding:6px 8px">${esc(it.val)}</textarea>`:`<input id="rvv_${i}" value="${esc(it.val)}" aria-label="${esc(it.label)}">`):esc(it.kind==='many'?it.val.map(tr).join(', '):it.kind==='parc'?it.val.map(x=>x+' kW').join(', '):tr(it.val))}</div>
+    ${it.cur?`<div class="curv">${t('current')} : ${esc(it.cur)}</div>`:''}</div>`).join('')}</div>
+    <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn pri" id="rvOk">${t('apply')}</button></div>`,
+  ()=>{$('#rvOk').onclick=()=>{let n=0;
+    items.forEach((it,i)=>{if(!$('#rv_'+i).checked)return;n++;
+      if(it.kind==='text')cur[it.k]=$('#rvv_'+i).value.trim();
+      else if(it.kind==='one')cur[it.k]=it.val;
+      else if(it.kind==='many'){cur[it.k]=[...(cur[it.k]||[]),...it.val]}
+      else if(it.kind==='parc'){cur.parc=cur.parc&&cur.parc.length?cur.parc:[{}];it.val.forEach(v=>{const r=cur.parc.find(x=>!x.kw);if(r)r.kw=v;else cur.parc.push({kw:v})})}});
+    closeDlg();renderForm();touch();toast(t('applied')(n))}});
+}
+
+/* --- Réception d'un texte partagé depuis une autre application (share target Android) --- */
+function receiveText(txt){
+  const last=S.lastId&&fiches.find(f=>f.id===S.lastId);
+  dialog(`<h3>${t('recvTitle')}</h3><p>${t('recvHelp')}</p><pre>${esc(txt.slice(0,1500))}</pre>
+   <div class="row">${last?`<button class="btn" id="rcCur">${esc(t('toCurrent')(last.societe||t('no')+' '+last.no))}</button>`:''}<button class="btn pri" id="rcNew">${t('newForm')}</button></div>`,
+  ()=>{const go=async f=>{closeDlg();if(f){cur=f;show('form')}else{await createAndOpen()}
+        appendTranscript(txt);renderForm();await persist();
+        const s=$('#f_transcript');if(s)s.scrollIntoView({block:'center'});analyzeAndReview()};
+      if(last)$('#rcCur').onclick=()=>go(last);$('#rcNew').onclick=()=>go(null)});
+}
+
+/* ---------- Démarrage ---------- */
+(async()=>{
+  applyStatic();
+  await openDB();
+  if(!db)$('#storeWarn').hidden=false;
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+  show('list');await refreshList();
+  const sp=new URLSearchParams(location.search);
+  const shared=['title','text','url'].map(k=>sp.get(k)).filter(Boolean).join('\n').trim();
+  if(shared){history.replaceState(null,'',location.pathname);receiveText(shared)}
+  if('serviceWorker' in navigator&&location.protocol.startsWith('http')){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+})();
+</script>
+</body>
+</html>
