@@ -48,6 +48,24 @@ button{cursor:pointer}
 
 main{max-width:1000px;margin:0 auto;padding:16px 16px 120px}
 
+.salonbar{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:6px;margin-bottom:12px}
+.salonbar .cur{flex:1;min-width:0;border:0;background:transparent;text-align:left;padding:4px 8px;display:flex;flex-direction:column;justify-content:center;min-height:44px;border-radius:var(--r)}
+.salonbar .cur:hover{background:var(--soft)}
+.salonbar .cur b{color:var(--navy);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.salonbar .cur span{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.icon-btn:disabled{opacity:.3;cursor:default}
+.slist{display:grid;gap:8px}
+.slist .s{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:var(--r);padding:4px 6px 4px 12px}
+.slist .s.on{border-color:var(--navy);background:#EEF1FA}
+.slist .pick{flex:1;min-width:0;text-align:left;border:0;background:transparent;min-height:48px;display:flex;flex-direction:column;justify-content:center}
+.slist .pick b{color:var(--navy)}
+.slist .pick span{font-size:13px;color:var(--muted)}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.dlg .help{margin:6px 0 14px;color:var(--muted);font-size:14px;line-height:1.4}
+.dlg hr.sep{border:0;border-top:1px solid var(--line);margin:4px 0 14px}
+.bkstate{font-size:14px;color:var(--muted)} .bkstate.warn{color:var(--warn);font-weight:700}
+.btn .dot{width:9px;height:9px;border-radius:50%;background:var(--warn);display:inline-block}
+.hdrinfo select{border:1px solid var(--line);border-radius:4px;padding:4px 6px;font-weight:700;background:var(--bg);max-width:60vw;min-height:36px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
 .search{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;min-height:44px;background:var(--bg)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--bg)}
@@ -193,6 +211,12 @@ table.parc .rm{border:0;background:transparent;color:var(--crit);width:40px;heig
   <div id="storeWarn" class="warnbar" hidden data-i18n="storeWarn"></div>
 
   <section id="vList">
+    <div class="salonbar">
+      <button class="icon-btn" id="sPrev" data-i18n-aria="prevSalon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="cur" id="sCur" data-i18n-aria="chooseSalon"><b id="sCurName"></b><span id="sCurInfo"></span></button>
+      <button class="icon-btn" id="sNext" data-i18n-aria="nextSalon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg></button>
+      <button class="btn" id="sNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span class="lbl-sm" data-i18n="newSalon"></span></button>
+    </div>
     <div class="toolbar">
       <input id="q" class="search" type="search" data-i18n-ph="search">
       <div class="seg" role="group">
@@ -213,9 +237,10 @@ table.parc .rm{border:0;background:transparent;color:var(--crit);width:40px;heig
 </main>
 
 <nav class="bar" id="barList">
-  <button class="btn" id="bMore">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span data-i18n="export"></span></button>
-  <button class="btn" id="bPdfAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><span data-i18n="pdfAll"></span></button>
+  <button class="btn" id="bMore" data-i18n-aria="export">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span class="lbl-sm" data-i18n="export"></span></button>
+  <button class="btn" id="bPdfAll" data-i18n-aria="pdfAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><span class="lbl-sm" data-i18n="pdfAll"></span></button>
+  <button class="btn" id="bBackup" data-i18n-aria="backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/><path d="M12 17v-6M9 13l3-3 3 3"/></svg><span class="lbl-sm" data-i18n="backup"></span><i class="dot" id="bkDot" hidden></i></button>
   <div class="sp"></div>
   <button class="btn pri" id="bNew">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="newForm"></span></button>
@@ -433,7 +458,7 @@ if(!UI[S.lang])S.lang='fr';
 
 /* ---------- Langue ---------- */
 const t=k=>UI[S.lang][k]??UI.fr[k];
-const tr=s=>S.lang==='fr'?s:(DICT[S.lang][s]??s);
+const tr=s=>{if(S.lang!=='fr'&&/^J\d+$/.test(s))return 'D'+s.slice(1);return S.lang==='fr'?s:(DICT[S.lang][s]??s)};
 const fmtDT=x=>x?new Date(x).toLocaleString(t('locale'),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
 function applyStatic(){
   document.documentElement.lang=S.lang;
@@ -472,10 +497,9 @@ function dbDel(id){if(!db){mem.delete(id);return Promise.resolve()}return new Pr
 let fiches=[], cur=null, filt={q:'',prio:'',etat:''}, saveT=null;
 
 function newFiche(){
-  S.counter=(S.counter||0)+1; saveSettings();
-  const d=todayISO(); let jour='';
-  if(S.j1===d)jour='J1'; else if(S.j2===d)jour='J2'; else if(S.j3===d)jour='J3';
-  return {id:uid(),no:S.counter,salon:S.salon,createdAt:Date.now(),updatedAt:Date.now(),done:false,sharedAt:null,
+  const s=curSalon(); s.counter=(s.counter||0)+1; saveSettings();
+  const i=(s.dates||[]).indexOf(todayISO()); const jour=i>=0&&i<s.days?'J'+(i+1):'';
+  return {id:uid(),no:s.counter,salonId:s.id,salon:s.name,createdAt:Date.now(),updatedAt:Date.now(),done:false,sharedAt:null,
     recuPar:S.recuPar||'',jour,parc:[{}],secteurs:[],applications:[],marques:[],role:[],repair:[],service:[],replace:[],engineering:[],negoce:[],actions:[]};
 }
 const prioLetter=f=>(f.priorite||'').charAt(0);
@@ -483,18 +507,19 @@ const interetN=f=>parseInt(f.interet)||0;
 
 /* ---------- Vues ---------- */
 function setHeader(view){
-  if(view==='list'){$('#hTitle').textContent=t('appTitle');$('#hSub').textContent=S.salon}
-  else{$('#hTitle').textContent=cur.societe||t('newForm');$('#hSub').textContent=`${cur.salon} · ${t('formNo')} ${cur.no}`}
+  if(view==='list'){$('#hTitle').textContent=t('appTitle');$('#hSub').textContent=curSalon().name}
+  else{$('#hTitle').textContent=cur.societe||t('newForm');$('#hSub').textContent=`${salonName(cur)} · ${t('formNo')} ${cur.no}`}
 }
 function show(view){
   const l=view==='list';
   $('#vList').hidden=!l;$('#barList').hidden=!l;$('#vForm').hidden=l;$('#barForm').hidden=l;
   setHeader(view);window.scrollTo(0,0);
 }
-async function refreshList(){fiches=(await dbAll()).sort((a,b)=>b.createdAt-a.createdAt);renderList()}
+async function refreshList(){fiches=(await dbAll()).sort((a,b)=>b.createdAt-a.createdAt);await migrateFiches();renderList()}
 function filtered(){
   const q=filt.q.trim().toLowerCase();
   return fiches.filter(f=>{
+    if(f.salonId!==S.curSalon)return false;
     if(filt.prio&&prioLetter(f)!==filt.prio)return false;
     if(filt.etat==='draft'&&f.done)return false;
     if(filt.etat==='notshared'&&f.sharedAt)return false;
@@ -504,10 +529,11 @@ function filtered(){
 }
 const TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
 function renderList(){
-  const list=filtered();
-  const n=fiches.length,a=fiches.filter(f=>prioLetter(f)==='A').length,dr=fiches.filter(f=>!f.done).length,ns=fiches.filter(f=>!f.sharedAt).length;
+  renderSalonBar();
+  const list=filtered(), SF=fiches.filter(f=>f.salonId===S.curSalon);
+  const n=SF.length,a=SF.filter(f=>prioLetter(f)==='A').length,dr=SF.filter(f=>!f.done).length,ns=SF.filter(f=>!f.sharedAt).length;
   $('#stats').innerHTML=`<span>${t('nForms')(n)}</span><span>${t('nA')(a)}</span><span>${t('nDraft')(dr)}</span><span>${t('nNotShared')(ns)}</span>`;
-  if(!fiches.length){$('#cards').innerHTML=`<div class="empty"><b>${t('emptyT')}</b>${t('emptyP')}</div>`;return}
+  if(!SF.length){$('#cards').innerHTML=`<div class="empty"><b>${t('emptyT')}</b>${t('emptyP')}</div>`;return}
   if(!list.length){$('#cards').innerHTML=`<div class="empty">${t('noMatch')}</div>`;return}
   $('#cards').innerHTML=list.map(f=>{
     const p=prioLetter(f),i=interetN(f);
@@ -528,7 +554,8 @@ function renderList(){
 /* ---------- Rendu de la fiche ---------- */
 function chipGroup(fd,val){
   const one=fd.y==='one', sel=one?[val]:(val||[]);
-  return `<div class="chips ${one?'one':''}" role="group" aria-label="${esc(tr(fd.l||''))}" data-k="${fd.k}" data-y="${fd.y}">${fd.o.map(o=>
+  const opts=fd.k==='jour'?Array.from({length:(salonById(cur.salonId)||{days:3}).days},(_,i)=>'J'+(i+1)):fd.o;
+  return `<div class="chips ${one?'one':''}" role="group" aria-label="${esc(tr(fd.l||''))}" data-k="${fd.k}" data-y="${fd.y}">${opts.map(o=>
     `<button type="button" class="chip ${sel.includes(o)?'on':''}" data-v="${esc(o)}" aria-pressed="${sel.includes(o)}">${esc(tr(o))}</button>`).join('')}</div>`
    +(fd.other?`<input class="other" id="f_${fd.other}" data-k="${fd.other}" placeholder="${t('otherPh')}" value="${esc(cur[fd.other])}">`:'');
 }
@@ -545,7 +572,7 @@ function photoField(){
     ${cur.carte?`<button type="button" class="btn danger" id="rmPhoto">${t('remove')}</button>`:''}</div>`;
 }
 function renderFormInfo(){
-  if(cur)$('#fInfo').innerHTML=`<span>${t('salon')} <b>${esc(cur.salon)}</b></span><span>${t('form')} <b>${t('no')} ${cur.no}</b></span><span>${t('created')} <b>${fmtDT(cur.createdAt)}</b></span>${cur.sharedAt?`<span>${t('sharedOn')} <b>${fmtDT(cur.sharedAt)}</b></span>`:''}`;
+  if(cur)$('#fInfo').innerHTML=`<span>${t('salon')} <select id="fSalon" aria-label="${t('salon')}">${sortedSalons().reverse().map(s=>`<option value="${s.id}" ${s.id===cur.salonId?'selected':''}>${esc(s.name)}</option>`).join('')}</select></span><span>${t('form')} <b>${t('no')} ${cur.no}</b></span><span>${t('created')} <b>${fmtDT(cur.createdAt)}</b></span>${cur.sharedAt?`<span>${t('sharedOn')} <b>${fmtDT(cur.sharedAt)}</b></span>`:''}`;
 }
 function renderForm(){
   renderFormInfo();
@@ -628,7 +655,7 @@ function askDelete(f){
 async function doDelete(f){
   const copy=JSON.parse(JSON.stringify(f));
   if(cur&&cur.id===f.id){stopRec();clearTimeout(saveT);cur=null}
-  await dbDel(f.id);closeDlg();show('list');await refreshList();
+  await dbDel(f.id);markDirty();closeDlg();show('list');await refreshList();
   toast(t('delToast'),{label:t('undo'),run:async()=>{await dbPut(copy);await refreshList();toast(t('restored'))}});
 }
 $('#bDel').onclick=()=>askDelete(cur);
@@ -644,7 +671,7 @@ function valText(fd,f){const v=f[fd.k];
   return v||'';
 }
 function summary(f){
-  const L=[`${t('formTitle').toUpperCase()} · ${f.salon} · ${t('no')} ${f.no}`,`${t('createdOn')} ${fmtDT(f.createdAt)}`,''];
+  const L=[`${t('formTitle').toUpperCase()} · ${salonName(f)} · ${t('no')} ${f.no}`,`${t('createdOn')} ${fmtDT(f.createdAt)}`,''];
   [...SECTIONS.slice(1),SECTIONS[0]].forEach(s=>{const rows=s.f.map(fd=>[tr(fd.l),valText(fd,f)]).filter(r=>r[1]);
     if(rows.length){L.push(tr(s.t).toUpperCase());rows.forEach(([l,v])=>L.push(`${l} : ${v}`));L.push('')}});
   L.push(t('footer'));
@@ -654,14 +681,14 @@ function csvOf(list){
   const flds=[...FIELDS.filter(fd=>fd.y!=='photo'&&fd.y!=='dict'),...FIELDS.filter(fd=>fd.y==='dict')];
   const head=[{fr:'N°',nl:'Nr.',en:'No.'}[S.lang],t('salon'),t('date'),t('state'),t('sharedCol')].concat(flds.map(fd=>tr(fd.l)),[t('photoCol')]);
   const q=v=>{v=String(v??'');return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-  const rows=list.map(f=>[f.no,f.salon,fmtDT(f.createdAt),f.done?t('complete'):t('draft'),fmtDT(f.sharedAt)]
+  const rows=list.map(f=>[f.no,salonName(f),fmtDT(f.createdAt),f.done?t('complete'):t('draft'),fmtDT(f.sharedAt)]
     .concat(flds.map(fd=>valText(fd,f).replace(/\n/g,' ')),[f.carte?t('yes'):t('noW')]));
   return '﻿'+[head,...rows].map(r=>r.map(q).join(';')).join('\r\n');
 }
 const FOOT='MGH NV · Rittwegerlaan 2B, B-1830 Machelen · +32 (0)2 753 00 40 · info@mgh.be · www.mgh.be · BE 0477.997.984';
 function ficheHTML(f){
-  return `<div class="hd"><img src="logo.png" alt="MGH"><span>${esc(f.salon)} · ${t('formNo')} ${f.no}</span></div><h1>${t('formTitle')} · ${esc(f.societe||t('noCompany'))}</h1>
-  <div class="meta">${esc(f.salon)} · ${t('formNo')} ${f.no} · ${fmtDT(f.createdAt)}${f.recuPar?` · ${t('receivedBy')} ${esc(f.recuPar)}`:''}</div>
+  return `<div class="hd"><img src="logo.png" alt="MGH"><span>${esc(salonName(f))} · ${t('formNo')} ${f.no}</span></div><h1>${t('formTitle')} · ${esc(f.societe||t('noCompany'))}</h1>
+  <div class="meta">${esc(salonName(f))} · ${t('formNo')} ${f.no} · ${fmtDT(f.createdAt)}${f.recuPar?` · ${t('receivedBy')} ${esc(f.recuPar)}`:''}</div>
   ${[...SECTIONS.slice(1),SECTIONS[0]].map(s=>{const rows=s.f.filter(fd=>fd.y!=='photo').map(fd=>[tr(fd.l),valText(fd,f)]).filter(r=>r[1]);
     return rows.length?`<h2>${esc(tr(s.t))}</h2><table>${rows.map(r=>`<tr><td class="k">${esc(r[0])}</td><td>${esc(r[1]).replace(/\n/g,'<br>')}</td></tr>`).join('')}</table>`:''}).join('')}
   ${f.carte?`<h2>${esc(tr('Carte de visite'))}</h2><img class="carte" src="${f.carte}" alt="">`:''}
@@ -679,14 +706,14 @@ function printAll(list){
   list=[...list].sort((a,b)=>a.no-b.no);
   const pc={A:0,B:0,C:0,'':0};list.forEach(f=>pc[prioLetter(f)]++);
   const head=[t('no'),tr('Société'),tr('Nom, prénom'),tr('CP / Ville'),tr('Priorité'),tr('Intérêt'),tr('Échéance projet'),tr('Actions')];
-  const recap=`<div class="cover"><div class="hd"><img src="logo.png" alt="MGH"><span>${esc(S.salon)}</span></div>
-   <h1>${t('recapTitle')} · ${esc(S.salon)}</h1>
+  const recap=`<div class="cover"><div class="hd"><img src="logo.png" alt="MGH"><span>${esc(curSalon().name)}</span></div>
+   <h1>${t('recapTitle')} · ${esc(curSalon().name)}</h1>
    <div class="meta">${t('generated')} ${fmtDT(Date.now())} · ${t('nForms')(list.length).replace(/<\/?b>/g,'')} · A ${pc.A} · B ${pc.B} · C ${pc.C}</div>
    <table class="recap"><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${list.map(f=>`<tr>
      <td>${f.no}</td><td><b>${esc(f.societe||t('noCompany'))}</b></td><td>${esc([f.nom,f.fonction].filter(Boolean).join(', '))}</td><td>${esc(f.cpVille||'')}</td>
      <td class="c">${prioLetter(f)}</td><td class="c">${interetN(f)||''}</td><td>${esc(f.echeance?tr(f.echeance):'')}</td><td>${esc((f.actions||[]).map(tr).join(', '))}</td></tr>`).join('')}</tbody></table>
    <div class="ft">${FOOT}</div></div>`;
-  runPrint(recap+list.map(f=>`<div class="pg">${ficheHTML(f)}</div>`).join(''),`MGH_${t('fileForms')}_${slug(S.salon)}_${todayISO()}`);
+  runPrint(recap+list.map(f=>`<div class="pg">${ficheHTML(f)}</div>`).join(''),`MGH_${t('fileForms')}_${slug(curSalon().name)}_${todayISO()}`);
 }
 $('#bPrint').onclick=async()=>{await persist();printFiche(cur)};
 
@@ -716,7 +743,7 @@ async function shareFiche(f){
   fallbackShare(f,text);
 }
 function fallbackShare(f,text){
-  const subj=`${t('formTitle')} ${f.salon} · ${f.societe||''}`;
+  const subj=`${t('formTitle')} ${salonName(f)} · ${f.societe||''}`;
   const mail=`mailto:${encodeURIComponent(S.email||'')}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(text.slice(0,1800))}`;
   dialog(`<h3>${t('shareTitle')}</h3><p>${t('shareFallback')}</p><pre id="shTxt">${esc(text)}</pre>
   <div class="row"><button class="btn" data-close>${t('close')}</button><button class="btn" id="cpy">${t('copy')}</button><a class="btn pri" href="${mail}" id="mailA">${t('openMail')}</a></div>`,
@@ -733,35 +760,20 @@ $('#bMore').onclick=()=>{
    <div class="row" style="justify-content:flex-start;margin:0 0 14px"><button class="btn pri" id="xShare">${t('shareCsv')}</button><button class="btn" id="xDl">${t('dlCsv')}</button></div>
    <p><b>${t('pdfAll')}</b> : ${t('pdfAllP')(list.length)}</p>
    <div class="row" style="justify-content:flex-start;margin:0 0 14px"><button class="btn pri" id="xPdf">${t('pdfAll')}</button></div>
-   <p><b>${t('bkT')}</b> : ${t('bkP')}</p>
-   <div class="row" style="justify-content:flex-start;margin:0 0 6px"><button class="btn" id="bkShare">${t('shareBk')}</button><button class="btn" id="bkDl">${t('download')}</button>
-   <label class="btn" for="impIn">${t('importBk')}</label><input id="impIn" type="file" accept=".json,application/json" hidden></div>
    <div class="row"><button class="btn" data-close>${t('close')}</button></div>`,()=>{
     const stamp=todayISO();
-    const csvFile=()=>new File([csvOf(list)],`MGH_${t('fileForms')}_${slug(S.salon)}_${stamp}.csv`,{type:'text/csv'});
-    const bkFile=()=>new File([JSON.stringify({app:'mgh-fiche-salon',v:1,exportedAt:Date.now(),fiches})],`MGH_${t('fileBk')}_${slug(S.salon)}_${stamp}.json`,{type:'application/json'});
-    $('#xShare').onclick=async()=>{const r=await tryShare({title:t('appTitle'),text:`${t('appTitle')} · ${S.salon}`,files:[csvFile()]});
+    const csvFile=()=>new File([csvOf(list)],`MGH_${t('fileForms')}_${slug(curSalon().name)}_${stamp}.csv`,{type:'text/csv'});
+    $('#xShare').onclick=async()=>{const r=await tryShare({title:t('appTitle'),text:`${t('appTitle')} · ${curSalon().name}`,files:[csvFile()]});
       if(r==='ok'){const now=Date.now();for(const f of list){f.sharedAt=f.sharedAt||now;await dbPut(f)}closeDlg();refreshList();toast(t('expShared'))}
       else if(r==='none'){const f=csvFile();download(f,f.name)}};
     $('#xPdf').onclick=()=>{closeDlg();printAll(list)};
     $('#xDl').onclick=()=>{const f=csvFile();download(f,f.name);toast(t('csvDl'))};
-    $('#bkShare').onclick=async()=>{const r=await tryShare({title:t('bkT'),files:[bkFile()]});if(r==='none'){const f=bkFile();download(f,f.name)}};
-    $('#bkDl').onclick=()=>{const f=bkFile();download(f,f.name);toast(t('bkDl'))};
-    $('#impIn').onchange=async e=>{const file=e.target.files[0];if(!file)return;
-      try{const d=JSON.parse(await file.text());if(!Array.isArray(d.fiches))throw 0;let n=0;
-        for(const f of d.fiches){if(f&&f.id&&!fiches.some(x=>x.id===f.id)){await dbPut(f);n++}}
-        closeDlg();await refreshList();toast(t('imported')(n))}
-      catch(err){toast(t('importErr'))}};
   });
 };
 
 /* ---------- Paramètres ---------- */
 $('#bSettings').onclick=()=>dialog(`<h3>${t('setTitle')}</h3>
   <div class="grid">
-   <div class="fld full"><label for="sSalon">${t('salonName')}</label><input id="sSalon" value="${esc(S.salon)}"></div>
-   <div class="fld"><label for="sJ1">${t('dateJ')} ${tr('J1')}</label><input id="sJ1" type="date" value="${esc(S.j1)}"></div>
-   <div class="fld"><label for="sJ2">${t('dateJ')} ${tr('J2')}</label><input id="sJ2" type="date" value="${esc(S.j2)}"></div>
-   <div class="fld"><label for="sJ3">${t('dateJ')} ${tr('J3')}</label><input id="sJ3" type="date" value="${esc(S.j3)}"></div>
    <div class="fld"><label for="sRecu">${t('defRecu')}</label><input id="sRecu" value="${esc(S.recuPar)}" placeholder="DM, LM, HH, JD, LMA"></div>
    <div class="fld full"><label for="sMail">${t('defMail')}</label><input id="sMail" type="email" value="${esc(S.email)}" placeholder="ventes@mgh.be"></div>
    <div class="fld"><label for="sRecName">${t('recName')}</label><input id="sRecName" value="${esc(S.recName||'')}"></div>
@@ -770,8 +782,7 @@ $('#bSettings').onclick=()=>dialog(`<h3>${t('setTitle')}</h3>
   </div>
   <p style="margin-top:12px;color:var(--muted);font-size:14px">${t('setHelp')}</p>
   <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn pri" id="sOk">${t('save')}</button></div>`,
-  ()=>{$('#sOk').onclick=()=>{S.salon=$('#sSalon').value.trim()||DEF_SETTINGS.salon;S.j1=$('#sJ1').value;S.j2=$('#sJ2').value;S.j3=$('#sJ3').value;
-    S.recuPar=$('#sRecu').value.trim().toUpperCase();S.email=$('#sMail').value.trim();S.recName=$('#sRecName').value.trim();S.recLink=$('#sRecLink').value.trim();saveSettings();if(cur)renderForm();closeDlg();if(!cur)setHeader('list');toast(t('setSaved'))}});
+  ()=>{$('#sOk').onclick=()=>{S.recuPar=$('#sRecu').value.trim().toUpperCase();S.email=$('#sMail').value.trim();S.recName=$('#sRecName').value.trim();S.recLink=$('#sRecLink').value.trim();saveSettings();if(cur)renderForm();closeDlg();if(!cur)setHeader('list');toast(t('setSaved'))}});
 
 /* ---------- Dialogues ---------- */
 function dialog(html,bind){$('#dlg').innerHTML=html;$('#ov').hidden=false;$('#dlg').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeDlg);bind&&bind()}
@@ -987,11 +998,167 @@ function receiveText(txt){
       if(last)$('#rcCur').onclick=()=>go(last);$('#rcNew').onclick=()=>go(null)});
 }
 
+/* ---------- Salons : création, navigation, modification ---------- */
+Object.assign(UI.fr,{export:'Exporter',expTitle:'Exporter',newSalon:'Nouveau salon',salons:'Salons',editSalon:'Modifier le salon',prevSalon:'Salon précédent',nextSalon:'Salon suivant',chooseSalon:'Choisir un salon',
+  nbDays:'Nombre de jours',salonDates:'Dates',createSalon:'Créer le salon',deleteSalon:'Supprimer le salon',needSalonName:'Indiquez le nom du salon.',lastSalon:'Impossible de supprimer le seul salon. Créez-en un autre avant.',
+  delSalonTitle:'Supprimer ce salon ?',delSalonBody:n=>n?`Le salon et ses ${n} fiche${n>1?'s':''} seront supprimés de la tablette. Faites une sauvegarde avant.`:'Le salon ne contient aucune fiche.',
+  salonDeleted:'Salon supprimé',salonCreated:'Salon créé',salonSaved:'Salon enregistré',nDays:n=>`${n} jour${n>1?'s':''}`,moved:(s,n)=>`Fiche déplacée vers ${s} (n° ${n})`,salonHelp:'Le jour de chaque nouvelle fiche est coché automatiquement si la date du jour figure dans les dates du salon.',
+  setHelp:'Nom, nombre de jours et dates des salons : barre du salon, en haut de la liste.',
+  backup:'Sauvegarder',never:'jamais',bkTitle:'Sauvegarder les fiches',bkSummary:(f,s)=>`Sauvegarde complète : ${f} fiche${f>1?'s':''}, ${s} salon${s>1?'s':''}, photos comprises.`,lastBk:'Dernière sauvegarde',bkPending:'modifications non sauvegardées',
+  bkLocal:'Enregistrer dans un fichier',bkLocalP:'Choisissez l’emplacement : stockage de la tablette, carte SD, ou OneDrive / Drive s’ils apparaissent dans le sélecteur.',bkLocalP2:'Le fichier est enregistré dans le dossier Téléchargements de la tablette.',
+  bkOneDrive:'Envoyer vers OneDrive',bkOneP:'Ouvre le menu Partager : choisissez OneDrive, puis le dossier de destination. L’application OneDrive doit être installée et connectée au compte MGH.',
+  restoreT:'Restaurer',restoreP:'importe une sauvegarde (.json ou .txt) depuis la tablette ou OneDrive. Les fiches et salons déjà présents sont conservés, seuls les manquants sont ajoutés.',
+  bkSaved:'Sauvegarde enregistrée',bkDownloaded:'Sauvegarde enregistrée dans Téléchargements',bkSent:'Sauvegarde envoyée',bkOneFallback:'Partage indisponible : sauvegarde enregistrée dans Téléchargements. Déposez-la dans OneDrive depuis l’application OneDrive.',importedSalons:n=>`${n} salon${n>1?'s':''} ajouté${n>1?'s':''}`});
+Object.assign(UI.nl,{export:'Exporteren',expTitle:'Exporteren',newSalon:'Nieuwe beurs',salons:'Beurzen',editSalon:'Beurs wijzigen',prevSalon:'Vorige beurs',nextSalon:'Volgende beurs',chooseSalon:'Beurs kiezen',
+  nbDays:'Aantal dagen',salonDates:'Data',createSalon:'Beurs aanmaken',deleteSalon:'Beurs verwijderen',needSalonName:'Vul de naam van de beurs in.',lastSalon:'De enige beurs kan niet verwijderd worden. Maak eerst een andere aan.',
+  delSalonTitle:'Deze beurs verwijderen?',delSalonBody:n=>n?`De beurs en de ${n} fiche${n>1?'s':''} worden van de tablet verwijderd. Maak eerst een back-up.`:'De beurs bevat geen fiches.',
+  salonDeleted:'Beurs verwijderd',salonCreated:'Beurs aangemaakt',salonSaved:'Beurs opgeslagen',nDays:n=>`${n} dag${n>1?'en':''}`,moved:(s,n)=>`Fiche verplaatst naar ${s} (nr. ${n})`,salonHelp:'De dag van elke nieuwe fiche wordt automatisch aangevinkt als de datum van vandaag in de beursdata staat.',
+  setHelp:'Naam, aantal dagen en data van de beurzen: beursbalk bovenaan de lijst.',
+  backup:'Back-up',never:'nooit',bkTitle:'Fiches back-uppen',bkSummary:(f,s)=>`Volledige back-up: ${f} fiche${f>1?'s':''}, ${s} beurs${s>1?'en':''}, foto’s inbegrepen.`,lastBk:'Laatste back-up',bkPending:'niet-opgeslagen wijzigingen',
+  bkLocal:'Opslaan in een bestand',bkLocalP:'Kies de locatie: opslag van de tablet, SD-kaart, of OneDrive / Drive als ze in de kiezer verschijnen.',bkLocalP2:'Het bestand wordt opgeslagen in de map Downloads van de tablet.',
+  bkOneDrive:'Naar OneDrive sturen',bkOneP:'Opent het menu Delen: kies OneDrive en daarna de doelmap. De OneDrive-app moet geïnstalleerd zijn en verbonden met het MGH-account.',
+  restoreT:'Herstellen',restoreP:'importeert een back-up (.json of .txt) van de tablet of OneDrive. Bestaande fiches en beurzen blijven behouden, enkel ontbrekende worden toegevoegd.',
+  bkSaved:'Back-up opgeslagen',bkDownloaded:'Back-up opgeslagen in Downloads',bkSent:'Back-up verstuurd',bkOneFallback:'Delen niet beschikbaar: back-up opgeslagen in Downloads. Zet hem in OneDrive via de OneDrive-app.',importedSalons:n=>`${n} beurs${n>1?'en':''} toegevoegd`});
+Object.assign(UI.en,{export:'Export',expTitle:'Export',newSalon:'New show',salons:'Shows',editSalon:'Edit show',prevSalon:'Previous show',nextSalon:'Next show',chooseSalon:'Choose a show',
+  nbDays:'Number of days',salonDates:'Dates',createSalon:'Create show',deleteSalon:'Delete show',needSalonName:'Enter the show name.',lastSalon:'The only show cannot be deleted. Create another one first.',
+  delSalonTitle:'Delete this show?',delSalonBody:n=>n?`The show and its ${n} form${n>1?'s':''} will be removed from the tablet. Make a backup first.`:'The show has no forms.',
+  salonDeleted:'Show deleted',salonCreated:'Show created',salonSaved:'Show saved',nDays:n=>`${n} day${n>1?'s':''}`,moved:(s,n)=>`Form moved to ${s} (no. ${n})`,salonHelp:'The day of each new form is ticked automatically when today is one of the show dates.',
+  setHelp:'Show name, number of days and dates: show bar at the top of the list.',
+  backup:'Back up',never:'never',bkTitle:'Back up forms',bkSummary:(f,s)=>`Full backup: ${f} form${f>1?'s':''}, ${s} show${s>1?'s':''}, photos included.`,lastBk:'Last backup',bkPending:'unsaved changes',
+  bkLocal:'Save to a file',bkLocalP:'Choose the location: tablet storage, SD card, or OneDrive / Drive if they appear in the picker.',bkLocalP2:'The file is saved in the tablet Downloads folder.',
+  bkOneDrive:'Send to OneDrive',bkOneP:'Opens the Share menu: choose OneDrive, then the target folder. The OneDrive app must be installed and signed in with the MGH account.',
+  restoreT:'Restore',restoreP:'imports a backup (.json or .txt) from the tablet or OneDrive. Existing forms and shows are kept, only missing ones are added.',
+  bkSaved:'Backup saved',bkDownloaded:'Backup saved in Downloads',bkSent:'Backup sent',bkOneFallback:'Sharing unavailable: backup saved in Downloads. Upload it from the OneDrive app.',importedSalons:n=>`${n} show${n>1?'s':''} added`});
+
+const salonById=id=>(S.salons||[]).find(s=>s.id===id);
+const curSalon=()=>salonById(S.curSalon)||S.salons[0];
+const salonName=f=>{const s=f&&salonById(f.salonId);return s?s.name:((f&&f.salon)||'')};
+const addDays=(iso,k)=>{if(!iso)return '';const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+k);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const plain=h=>String(h).replace(/<\/?b>/g,'');
+function sortedSalons(){return [...S.salons].sort((a,b)=>((a.dates&&a.dates[0])||'9999').localeCompare((b.dates&&b.dates[0])||'9999')||(a.createdAt||0)-(b.createdAt||0))}
+function salonDatesText(s){const d=(s.dates||[]).filter(Boolean).sort();const n=t('nDays')(s.days);if(!d.length)return n;const a=fmtD(d[0]),b=fmtD(d[d.length-1]);return (a===b?a:a+' → '+b)+' · '+n}
+function ensureSalons(){
+  if(!Array.isArray(S.salons)||!S.salons.length){
+    S.salons=[{id:uid(),name:S.salon||'SEPEM Douai 2026',days:3,dates:[S.j1||'',S.j2||'',S.j3||''],counter:S.counter||0,createdAt:Date.now()}];
+  }
+  if(!salonById(S.curSalon))S.curSalon=S.salons[0].id;
+  saveSettings();
+}
+async function migrateFiches(){
+  let changed=false;
+  for(const f of fiches){
+    if(f.salonId&&salonById(f.salonId))continue;
+    let s=S.salons.find(x=>x.name===(f.salon||''));
+    if(!s){s={id:uid(),name:f.salon||'Salon',days:3,dates:['','',''],counter:0,createdAt:f.createdAt||Date.now()};S.salons.push(s)}
+    s.counter=Math.max(s.counter||0,f.no||0);f.salonId=s.id;await dbPut(f);changed=true;
+  }
+  if(changed)saveSettings();
+}
+const isDirty=()=>fiches.some(f=>(f.updatedAt||f.createdAt||0)>(S.lastBackup||0))||(S.dirtyAt||0)>(S.lastBackup||0);
+function markDirty(){S.dirtyAt=Date.now();saveSettings()}
+function renderSalonBar(){
+  const s=curSalon(),L=sortedSalons(),i=L.indexOf(s),n=fiches.filter(f=>f.salonId===s.id).length;
+  $('#sCurName').textContent=s.name;
+  $('#sCurInfo').textContent=`${salonDatesText(s)} · ${plain(t('nForms')(n))}${L.length>1?` · ${i+1}/${L.length}`:''}`;
+  $('#sPrev').disabled=i<=0;$('#sNext').disabled=i>=L.length-1;
+  $('#bkDot').hidden=!(fiches.length&&isDirty());
+}
+function switchSalon(id){if(!salonById(id))return;S.curSalon=id;saveSettings();filt.q='';$('#q').value='';setHeader('list');renderList();window.scrollTo(0,0)}
+$('#sPrev').onclick=()=>{const L=sortedSalons(),i=L.indexOf(curSalon());if(i>0)switchSalon(L[i-1].id)};
+$('#sNext').onclick=()=>{const L=sortedSalons(),i=L.indexOf(curSalon());if(i<L.length-1)switchSalon(L[i+1].id)};
+$('#sCur').onclick=()=>salonsDialog();
+$('#sNew').onclick=()=>salonForm(null);
+const PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg>';
+function salonsDialog(){
+  const L=sortedSalons().reverse();
+  dialog(`<h3>${t('salons')}</h3><div class="slist">${L.map(s=>{const n=fiches.filter(f=>f.salonId===s.id).length;
+    return `<div class="s ${s.id===S.curSalon?'on':''}"><button class="pick" data-pick="${s.id}"><b>${esc(s.name)}</b><span>${esc(salonDatesText(s))} · ${plain(t('nForms')(n))}</span></button>
+    <button class="icon-btn" data-edit="${s.id}" aria-label="${t('editSalon')}" title="${t('editSalon')}">${PEN}</button></div>`}).join('')}</div>
+   <div class="row"><button class="btn" data-close>${t('close')}</button><button class="btn pri" id="dNewSalon">+ ${t('newSalon')}</button></div>`,
+  ()=>{$('#dlg').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{closeDlg();switchSalon(b.dataset.pick)});
+       $('#dlg').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>salonForm(salonById(b.dataset.edit)));
+       $('#dNewSalon').onclick=()=>salonForm(null)});
+}
+function salonForm(s){
+  const isNew=!s;let days=s?s.days:2;let dates=s?[...(s.dates||[])]:[todayISO()];
+  const fill=()=>{dates.length=days;for(let i=0;i<days;i++){if(!dates[i])dates[i]=i&&dates[i-1]?addDays(dates[i-1],1):(dates[i]||'')}};
+  fill();
+  const datesHTML=()=>dates.map((d,i)=>`<div class="fld"><label for="snD${i}">${tr('J'+(i+1))}</label><input type="date" id="snD${i}" data-i="${i}" value="${esc(d)}"></div>`).join('');
+  dialog(`<h3>${isNew?t('newSalon'):t('editSalon')}</h3>
+   <div class="grid">
+    <div class="fld full" id="snNameW"><label for="snName">${t('salonName')}</label><input id="snName" value="${esc(s?s.name:'')}" placeholder="SEPEM Douai 2027"></div>
+    <div class="fld full"><span class="lbl">${t('nbDays')}</span><div class="chips one" id="snDays">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button type="button" class="chip ${n===days?'on':''}" data-n="${n}" aria-pressed="${n===days}">${n}</button>`).join('')}</div></div>
+    <div class="fld full"><span class="lbl">${t('salonDates')}</span><div class="days" id="snDates">${datesHTML()}</div><p class="help">${t('salonHelp')}</p></div>
+   </div>
+   <div class="row">${isNew?'':`<button class="btn danger" id="snDel">${t('deleteSalon')}</button>`}<div style="flex:1"></div><button class="btn" data-close>${t('cancel')}</button><button class="btn pri" id="snOk">${isNew?t('createSalon'):t('save')}</button></div>`,
+  ()=>{
+    $('#snDays').onclick=e=>{const b=e.target.closest('[data-n]');if(!b)return;days=+b.dataset.n;
+      $('#snDays').querySelectorAll('.chip').forEach(c=>{const on=c===b;c.classList.toggle('on',on);c.setAttribute('aria-pressed',on)});fill();$('#snDates').innerHTML=datesHTML()};
+    $('#snDates').onchange=e=>{const i=+e.target.dataset.i;dates[i]=e.target.value;
+      if(i===0&&dates[0]){for(let k=1;k<days;k++)dates[k]=addDays(dates[0],k);$('#snDates').innerHTML=datesHTML()}};
+    $('#snOk').onclick=async()=>{const name=$('#snName').value.trim();
+      if(!name){toast(t('needSalonName'));$('#snName').focus();return}
+      if(isNew){const n={id:uid(),name,days,dates:[...dates],counter:0,createdAt:Date.now()};S.salons.push(n);S.curSalon=n.id;markDirty();closeDlg();switchSalon(n.id);toast(t('salonCreated'))}
+      else{s.name=name;s.days=days;s.dates=[...dates];markDirty();closeDlg();setHeader('list');renderList();toast(t('salonSaved'))}};
+    if(!isNew)$('#snDel').onclick=()=>{
+      if(S.salons.length<2){toast(t('lastSalon'));return}
+      const list=fiches.filter(f=>f.salonId===s.id);
+      dialog(`<h3>${t('delSalonTitle')}</h3><p><b>${esc(s.name)}</b> · ${esc(salonDatesText(s))}</p><p>${t('delSalonBody')(list.length)}</p>
+        <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn dangerfill" id="okDelS">${t('deleteSalon')}</button></div>`,
+      ()=>{$('#okDelS').onclick=async()=>{for(const f of list)await dbDel(f.id);S.salons=S.salons.filter(x=>x.id!==s.id);
+        if(S.curSalon===s.id)S.curSalon=sortedSalons().slice(-1)[0].id;markDirty();closeDlg();await refreshList();setHeader('list');toast(t('salonDeleted'))}});
+    };
+  });
+}
+$('#fInfo').addEventListener('change',e=>{
+  if(e.target.id!=='fSalon'||!cur)return;const s=salonById(e.target.value);if(!s||s.id===cur.salonId)return;
+  s.counter=(s.counter||0)+1;cur.salonId=s.id;cur.salon=s.name;cur.no=s.counter;saveSettings();
+  if(cur.jour&&+cur.jour.slice(1)>s.days)cur.jour='';
+  renderForm();touch();toast(t('moved')(s.name,cur.no));
+});
+
+/* ---------- Sauvegarde : fichier local ou OneDrive ---------- */
+function backupJSON(){return JSON.stringify({app:'mgh-fiche-salon',v:2,exportedAt:Date.now(),salons:S.salons,fiches})}
+function bkName(ext){const d=new Date();return `MGH_${t('fileBk')}_${todayISO()}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.${ext||'json'}`}
+function markBackup(){S.lastBackup=Date.now();saveSettings();renderSalonBar()}
+$('#bBackup').onclick=()=>{
+  const dirty=fiches.length&&isDirty();
+  dialog(`<h3>${t('bkTitle')}</h3>
+   <p>${t('bkSummary')(fiches.length,S.salons.length)}</p>
+   <p class="bkstate ${dirty?'warn':''}">${t('lastBk')} : ${S.lastBackup?fmtDT(S.lastBackup):t('never')}${dirty?' · '+t('bkPending'):''}</p>
+   <div class="bkopt"><button class="btn pri" id="bkLocal">${t('bkLocal')}</button><p class="help">${window.showSaveFilePicker?t('bkLocalP'):t('bkLocalP2')}</p></div>
+   <div class="bkopt"><button class="btn pri" id="bkOne">${t('bkOneDrive')}</button><p class="help">${t('bkOneP')}</p></div>
+   <hr class="sep">
+   <p><b>${t('restoreT')}</b> : ${t('restoreP')}</p>
+   <div class="row" style="justify-content:flex-start;margin:0"><label class="btn" for="impIn">${t('importBk')}</label><input id="impIn" type="file" accept=".json,.txt,application/json,text/plain" hidden></div>
+   <div class="row"><button class="btn" data-close>${t('close')}</button></div>`,()=>{
+    $('#bkLocal').onclick=async()=>{const blob=new Blob([backupJSON()],{type:'application/json'}),name=bkName();
+      if(window.showSaveFilePicker){try{const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:'MGH',accept:{'application/json':['.json']}}]});
+        const w=await h.createWritable();await w.write(blob);await w.close();markBackup();closeDlg();toast(t('bkSaved'));return}
+        catch(e){if(e&&e.name==='AbortError')return}}
+      download(blob,name);markBackup();closeDlg();toast(t('bkDownloaded'))};
+    $('#bkOne').onclick=async()=>{const data=backupJSON();
+      let f=new File([data],bkName('json'),{type:'application/json'});
+      if(!(navigator.canShare&&navigator.canShare({files:[f]})))f=new File([data],bkName('txt'),{type:'text/plain'});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){
+        try{await navigator.share({files:[f],title:t('bkTitle')});markBackup();closeDlg();toast(t('bkSent'))}catch(e){}
+      }else{download(new Blob([data],{type:'application/json'}),bkName());markBackup();closeDlg();toast(t('bkOneFallback'))}};
+    $('#impIn').onchange=async e=>{const file=e.target.files[0];if(!file)return;
+      try{const d=JSON.parse(await file.text());if(!Array.isArray(d.fiches))throw 0;let nS=0,n=0;
+        if(Array.isArray(d.salons))for(const s of d.salons){if(!s||!s.id)continue;const x=salonById(s.id);if(x)x.counter=Math.max(x.counter||0,s.counter||0);else{S.salons.push(s);nS++}}
+        saveSettings();
+        for(const f of d.fiches){if(f&&f.id&&!fiches.some(x=>x.id===f.id)){await dbPut(f);n++}}
+        closeDlg();await refreshList();toast(t('imported')(n)+(nS?' · '+t('importedSalons')(nS):''))}
+      catch(err){toast(t('importErr'))}};
+  });
+};
+
 /* ---------- Démarrage ---------- */
 (async()=>{
   applyStatic();
   await openDB();
   if(!db)$('#storeWarn').hidden=false;
+  ensureSalons();
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
   show('list');await refreshList();
   const sp=new URLSearchParams(location.search);

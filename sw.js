@@ -1,5 +1,5 @@
 // Cache hors ligne de l'application. Incrémenter VERSION à chaque mise à jour des fichiers.
-const VERSION = 'mgh-fiche-salon-v5';
+const VERSION = 'mgh-fiche-salon-v6';
 const FILES = ['./', './index.html', './manifest.webmanifest', './logo.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
