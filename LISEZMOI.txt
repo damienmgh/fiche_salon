@@ -2,7 +2,9 @@ MGH Fiche salon · application tablette (PWA)
 
 CONTENU
 index.html, manifest.webmanifest, sw.js, logo.png, icon-192.png, icon-512.png
-Les 6 fichiers doivent rester ensemble dans le même dossier.
++ dossier ocr/ (lecture des cartes de visite, environ 18 Mo) : tesseract.min.js, worker.min.js, core/ (3 fichiers), lang/ (fra, nld, eng), licences.
+Les 6 fichiers et le dossier ocr/ doivent rester ensemble, avec la même arborescence.
+Moteur de lecture : Tesseract.js (licence Apache 2.0), hébergé avec l'application. Aucune image n'est envoyée à un service externe.
 
 1. MISE EN LIGNE (une seule fois)
 L'application doit être servie en HTTPS par un serveur web pour s'installer et fonctionner hors ligne.
@@ -10,7 +12,7 @@ Options :
  a) Service informatique MGH : copier le dossier sur un serveur web, par exemple https://salon.mgh.be/
  b) Azure Static Web Apps (Microsoft, offre gratuite) : solution recommandée si MGH travaille sous Microsoft 365. Voir 1.2.
  c) Netlify (gratuit) : créer un compte, glisser le dossier sur app.netlify.com/drop, récupérer l'adresse https fournie.
- d) GitHub Pages (gratuit) : dépôt contenant les 6 fichiers, activer Pages dans les paramètres du dépôt.
+ d) GitHub Pages (gratuit) : dépôt contenant les 6 fichiers et le dossier ocr/, activer Pages dans les paramètres du dépôt. Dépôt du dossier : « Add file > Upload files », glisser le dossier ocr entier depuis l'explorateur Windows (l'arborescence est conservée).
 
 1.1 SHAREPOINT : CE QUI EST POSSIBLE, CE QUI NE L'EST PAS
 SharePoint Online ne peut pas faire tourner l'application :
@@ -48,7 +50,8 @@ Mise à jour de l'application : redéployer les fichiers et changer VERSION dans
 
 3. AVANT LE SALON
  - Barre du salon (en haut de la liste) : « + Nouveau salon » > nom, nombre de jours (1 à 10), date du J1. Les jours suivants se remplissent automatiquement et restent modifiables un par un.
- - Roue dentée : initiales par défaut, email destinataire, application d'enregistrement.
+ - Roue dentée : initiales « Reçu par » par défaut (une ou plusieurs, ex. « DM, HH »), email destinataire, application d'enregistrement.
+ - Roue dentée > « Préparer la lecture de carte hors ligne », en wifi : télécharge une fois le moteur de lecture (environ 11 Mo). Sans cette étape, la première lecture de carte demande une connexion.
 
 3.1 NAVIGUER ENTRE LES SALONS
  - Flèches ‹ et › : salon précédent ou suivant, dans l'ordre chronologique.
@@ -60,7 +63,10 @@ Mise à jour de l'application : redéployer les fichiers et changer VERSION dans
 4. UTILISATION
  - « Nouvelle fiche » : nouveau contact. Enregistrement automatique à chaque saisie.
  - « Terminer » : contrôle la société et marque la fiche complète. Puis « Nouvelle fiche » pour le contact suivant.
- - Photo de la carte de visite : section Identification.
+ - « Reçu par » et « Secteur attribué » : plusieurs initiales peuvent être cochées.
+ - Carte de visite (section Identification) : « Photographier la carte ». La lecture démarre seule (quelques secondes), puis une liste des valeurs lues s'affiche : société, nom, fonction, mail, téléphones (GSM en premier), rue, CP / ville, pays, rôle. Corriger si besoin, cocher, « Reporter dans la fiche ». Un champ déjà rempli n'est remplacé que s'il est coché. Le texte brut lu reste consultable dans la liste.
+ - « Lire la carte » relance la lecture sur la photo déjà prise.
+ - Qualité de lecture : carte à plat, bien éclairée, sans reflet, cadrée au plus près, texte horizontal. Les cartes à fond foncé, les polices fantaisie et les logos sont moins bien lus.
  - « Partager » : email, WhatsApp, Teams, Drive… avec texte de la fiche, CSV et photo.
  - « PDF » (fiche ouverte) : impression ou enregistrement PDF de la fiche.
  - « PDF de toutes les fiches » (liste) : récapitulatif des contacts puis une page par fiche. Les filtres et la recherche en cours s'appliquent. Choisir « Enregistrer au format PDF » dans la fenêtre d'impression.

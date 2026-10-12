@@ -61,6 +61,11 @@ main{max-width:1000px;margin:0 auto;padding:16px 16px 120px}
 .slist .pick b{color:var(--navy)}
 .slist .pick span{font-size:13px;color:var(--muted)}
 .days{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.ocrst{font-size:14px;color:var(--navy);font-weight:600;margin-top:8px}
+.photo+.ocrst{display:block}
+.tip{margin:6px 0 0;color:var(--muted);font-size:13px}
+details.ocrraw{margin-top:10px;font-size:13px}
+details.ocrraw summary{cursor:pointer;color:var(--navy);font-weight:600;min-height:36px;display:flex;align-items:center}
 .dlg .help{margin:6px 0 14px;color:var(--muted);font-size:14px;line-height:1.4}
 .dlg hr.sep{border:0;border-top:1px solid var(--line);margin:4px 0 14px}
 .bkstate{font-size:14px;color:var(--muted)} .bkstate.warn{color:var(--warn);font-weight:700}
@@ -270,8 +275,8 @@ table.parc .rm{border:0;background:transparent;color:var(--crit);width:40px;heig
 const SECTIONS = [
  {t:'Dictée et transcription', f:[{k:'transcript',l:'Transcription',y:'dict'}]},
  {t:'Contexte', f:[
-  {k:'recuPar',l:'Reçu par',y:'one',o:['DM','LM','HH','JD','LMA']},
-  {k:'secteurAttr',l:'Secteur attribué',y:'one',o:['DM','LM','HH','LMA']},
+  {k:'recuPar',l:'Reçu par',y:'many',o:['DM','LM','HH','JD','LMA']},
+  {k:'secteurAttr',l:'Secteur attribué',y:'many',o:['DM','LM','HH','LMA']},
   {k:'jour',l:'Jour',y:'one',o:['J1','J2','J3']},
   {k:'statut',l:'Statut',y:'one',o:['Prospect','Client existant','Ancien client','Concurrent / fournisseur','Autre']},
  ]},
@@ -447,6 +452,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const fmtD=s=>s?s.split('-').reverse().join('/'):'';
 const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const asArr=v=>Array.isArray(v)?v:(v?[v]:[]);
 const slug=s=>(s||'fiche').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40)||'fiche';
 
 /* ---------- Paramètres ---------- */
@@ -500,7 +506,7 @@ function newFiche(){
   const s=curSalon(); s.counter=(s.counter||0)+1; saveSettings();
   const i=(s.dates||[]).indexOf(todayISO()); const jour=i>=0&&i<s.days?'J'+(i+1):'';
   return {id:uid(),no:s.counter,salonId:s.id,salon:s.name,createdAt:Date.now(),updatedAt:Date.now(),done:false,sharedAt:null,
-    recuPar:S.recuPar||'',jour,parc:[{}],secteurs:[],applications:[],marques:[],role:[],repair:[],service:[],replace:[],engineering:[],negoce:[],actions:[]};
+    recuPar:(S.recuPar||'').split(/[\s,;\/]+/).filter(Boolean),secteurAttr:[],jour,parc:[{}],secteurs:[],applications:[],marques:[],role:[],repair:[],service:[],replace:[],engineering:[],negoce:[],actions:[]};
 }
 const prioLetter=f=>(f.priorite||'').charAt(0);
 const interetN=f=>parseInt(f.interet)||0;
@@ -524,7 +530,7 @@ function filtered(){
     if(filt.etat==='draft'&&f.done)return false;
     if(filt.etat==='notshared'&&f.sharedAt)return false;
     if(!q)return true;
-    return [f.societe,f.nom,f.cpVille,f.site,f.fonction,f.mail,(f.marques||[]).join(' '),f.marqueAutre,f.notes,f.recuPar,f.transcript].join(' ').toLowerCase().includes(q);
+    return [f.societe,f.nom,f.cpVille,f.site,f.fonction,f.mail,(f.marques||[]).join(' '),f.marqueAutre,f.notes,asArr(f.recuPar).join(' '),f.transcript,f.carteTexte].join(' ').toLowerCase().includes(q);
   });
 }
 const TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
@@ -545,7 +551,7 @@ function renderList(){
         <div class="l3">${p?`<span class="pill p${p}">${p}</span>`:''}${dots}
           <span class="pill ${f.done?'done':'draft'}">${f.done?t('complete'):t('draft')}</span>
           ${f.sharedAt?`<span class="pill shared">${t('shared')}</span>`:''}
-          <span>${esc(f.recuPar||'')}</span><span>${fmtDT(f.createdAt)}</span></div>
+          <span>${esc(asArr(f.recuPar).join(', '))}</span><span>${fmtDT(f.createdAt)}</span></div>
       </button>
       <button class="del" data-del="${f.id}" aria-label="${t('delete')} ${esc(f.societe||'')}" title="${t('delete')}">${TRASH}</button>
     </div>`}).join('');
@@ -553,7 +559,7 @@ function renderList(){
 
 /* ---------- Rendu de la fiche ---------- */
 function chipGroup(fd,val){
-  const one=fd.y==='one', sel=one?[val]:(val||[]);
+  const one=fd.y==='one', sel=one?[val]:asArr(val);
   const opts=fd.k==='jour'?Array.from({length:(salonById(cur.salonId)||{days:3}).days},(_,i)=>'J'+(i+1)):fd.o;
   return `<div class="chips ${one?'one':''}" role="group" aria-label="${esc(tr(fd.l||''))}" data-k="${fd.k}" data-y="${fd.y}">${opts.map(o=>
     `<button type="button" class="chip ${sel.includes(o)?'on':''}" data-v="${esc(o)}" aria-pressed="${sel.includes(o)}">${esc(tr(o))}</button>`).join('')}</div>`
@@ -567,9 +573,11 @@ function parcTable(){
 }
 function photoField(){
   return `<div class="photo">${cur.carte?`<img src="${cur.carte}" alt="${esc(tr('Carte de visite'))}">`:''}
-    <label class="btn" for="camIn">${cur.carte?t('photoRetake'):t('photoTake')}</label>
+    <label class="btn ${cur.carte?'':'pri'}" for="camIn">${cur.carte?t('photoRetake'):t('photoTake')}</label>
     <input id="camIn" type="file" accept="image/*" capture="environment" hidden>
-    ${cur.carte?`<button type="button" class="btn danger" id="rmPhoto">${t('remove')}</button>`:''}</div>`;
+    ${cur.carte?`<button type="button" class="btn pri" id="ocrBtn">${t('readCard')}</button><button type="button" class="btn danger" id="rmPhoto">${t('remove')}</button>`:''}</div>
+    <div class="ocrst" id="ocrSt" role="status" aria-live="polite" hidden></div>
+    ${cur.carte?'':`<p class="tip">${t('photoTip')}</p>`}`;
 }
 function renderFormInfo(){
   if(cur)$('#fInfo').innerHTML=`<span>${t('salon')} <select id="fSalon" aria-label="${t('salon')}">${sortedSalons().reverse().map(s=>`<option value="${s.id}" ${s.id===cur.salonId?'selected':''}>${esc(s.name)}</option>`).join('')}</select></span><span>${t('form')} <b>${t('no')} ${cur.no}</b></span><span>${t('created')} <b>${fmtDT(cur.createdAt)}</b></span>${cur.sharedAt?`<span>${t('sharedOn')} <b>${fmtDT(cur.sharedAt)}</b></span>`:''}`;
@@ -602,11 +610,12 @@ $('#form').addEventListener('click',e=>{
   const c=e.target.closest('.chip');
   if(c){const g=c.parentElement,k=g.dataset.k,v=c.dataset.v;
     if(g.dataset.y==='one'){cur[k]=cur[k]===v?'':v;g.querySelectorAll('.chip').forEach(b=>{const on=b.dataset.v===cur[k];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
-    else{const a=cur[k]=cur[k]||[];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0)}
+    else{const a=cur[k]=asArr(cur[k]);const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0)}
     touch();return}
   if(e.target.id==='addParc'){cur.parc=cur.parc||[];cur.parc.push({});rerenderParc();touch();return}
   const rm=e.target.closest('[data-rmparc]');
   if(rm){cur.parc.splice(+rm.dataset.rmparc,1);if(!cur.parc.length)cur.parc=[{}];rerenderParc();touch();return}
+  if(e.target.id==='ocrBtn'){if(cur.carte)readCard(cur.carte);return}
   if(e.target.id==='rmPhoto'){cur.carte='';$('#photoBox').innerHTML=photoField();touch()}
 });
 function rerenderParc(){const w=$('.parcwrap').parentElement;w.innerHTML=`<span class="lbl">${esc(tr('Équipements'))}</span>`+parcTable()}
@@ -617,7 +626,9 @@ $('#form').addEventListener('input',e=>{
 });
 $('#form').addEventListener('change',async e=>{
   if(e.target.id!=='camIn'||!e.target.files[0])return;
-  try{cur.carte=await compress(e.target.files[0]);$('#photoBox').innerHTML=photoField();touch()}catch(err){toast(t('photoErr'))}
+  const file=e.target.files[0];
+  try{cur.carte=await compress(file);$('#photoBox').innerHTML=photoField();touch()}catch(err){toast(t('photoErr'));return}
+  readCard(file);
 });
 function compress(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);
   img.onload=()=>{const m=1400,s=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
@@ -662,7 +673,7 @@ $('#bDel').onclick=()=>askDelete(cur);
 
 /* ---------- Résumé, CSV, impression ---------- */
 function valText(fd,f){const v=f[fd.k];
-  if(fd.y==='many'){const a=(v||[]).map(tr);if(fd.other&&f[fd.other])a.push(f[fd.other]);return a.join(', ')}
+  if(fd.y==='many'){const a=asArr(v).map(tr);if(fd.other&&f[fd.other])a.push(f[fd.other]);return a.join(', ')}
   if(fd.y==='one')return v?tr(v):'';
   if(fd.y==='date')return fmtD(v);
   if(fd.y==='parc'){const F={equip:x=>x,marque:x=>x,type:x=>x,qte:x=>t('qty')+' '+x,kw:x=>x+' kW',age:x=>x+' '+t('years'),crit:x=>t('crit')+' '+x};
@@ -688,7 +699,7 @@ function csvOf(list){
 const FOOT='MGH NV · Rittwegerlaan 2B, B-1830 Machelen · +32 (0)2 753 00 40 · info@mgh.be · www.mgh.be · BE 0477.997.984';
 function ficheHTML(f){
   return `<div class="hd"><img src="logo.png" alt="MGH"><span>${esc(salonName(f))} · ${t('formNo')} ${f.no}</span></div><h1>${t('formTitle')} · ${esc(f.societe||t('noCompany'))}</h1>
-  <div class="meta">${esc(salonName(f))} · ${t('formNo')} ${f.no} · ${fmtDT(f.createdAt)}${f.recuPar?` · ${t('receivedBy')} ${esc(f.recuPar)}`:''}</div>
+  <div class="meta">${esc(salonName(f))} · ${t('formNo')} ${f.no} · ${fmtDT(f.createdAt)}${asArr(f.recuPar).length?` · ${t('receivedBy')} ${esc(asArr(f.recuPar).join(', '))}`:''}</div>
   ${[...SECTIONS.slice(1),SECTIONS[0]].map(s=>{const rows=s.f.filter(fd=>fd.y!=='photo').map(fd=>[tr(fd.l),valText(fd,f)]).filter(r=>r[1]);
     return rows.length?`<h2>${esc(tr(s.t))}</h2><table>${rows.map(r=>`<tr><td class="k">${esc(r[0])}</td><td>${esc(r[1]).replace(/\n/g,'<br>')}</td></tr>`).join('')}</table>`:''}).join('')}
   ${f.carte?`<h2>${esc(tr('Carte de visite'))}</h2><img class="carte" src="${f.carte}" alt="">`:''}
@@ -779,10 +790,12 @@ $('#bSettings').onclick=()=>dialog(`<h3>${t('setTitle')}</h3>
    <div class="fld"><label for="sRecName">${t('recName')}</label><input id="sRecName" value="${esc(S.recName||'')}"></div>
    <div class="fld"><label for="sRecLink">${t('recLink')}</label><input id="sRecLink" value="${esc(S.recLink||'')}" autocapitalize="off" placeholder="com.editeur.application"></div>
    <p class="full" style="margin:0;color:var(--muted);font-size:13px">${t('recHelp')}</p>
+   <div class="fld full"><button type="button" class="btn" id="sOcr">${t('ocrPrep')}</button><p style="margin:0;color:var(--muted);font-size:13px">${t('ocrPrepHelp')}</p></div>
   </div>
   <p style="margin-top:12px;color:var(--muted);font-size:14px">${t('setHelp')}</p>
   <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn pri" id="sOk">${t('save')}</button></div>`,
-  ()=>{$('#sOk').onclick=()=>{S.recuPar=$('#sRecu').value.trim().toUpperCase();S.email=$('#sMail').value.trim();S.recName=$('#sRecName').value.trim();S.recLink=$('#sRecLink').value.trim();saveSettings();if(cur)renderForm();closeDlg();if(!cur)setHeader('list');toast(t('setSaved'))}});
+  ()=>{$('#sOcr').onclick=async()=>{const b=$('#sOcr');b.disabled=true;b.textContent=t('ocrLoading');try{await getOcr();b.textContent=t('ocrReady');toast(t('ocrReady'))}catch(e){b.disabled=false;b.textContent=t('ocrPrep');toast(t('ocrErr'))}};
+    $('#sOk').onclick=()=>{S.recuPar=$('#sRecu').value.trim().toUpperCase();S.email=$('#sMail').value.trim();S.recName=$('#sRecName').value.trim();S.recLink=$('#sRecLink').value.trim();saveSettings();if(cur)renderForm();closeDlg();if(!cur)setHeader('list');toast(t('setSaved'))}});
 
 /* ---------- Dialogues ---------- */
 function dialog(html,bind){$('#dlg').innerHTML=html;$('#ov').hidden=false;$('#dlg').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeDlg);bind&&bind()}
@@ -963,28 +976,35 @@ function parseText(raw){
   const kw=[...nt.matchAll(/(\d+(?:[.,]\d+)?)\s?(kw|kilowatts?)\b/g)].map(x=>x[1].replace('.',','));
   return {P,many,kw};
 }
-function analyzeAndReview(){
-  const txt=(cur.transcript||'').trim();
-  if(!txt){toast(t('noText'));return}
-  const {P,many,kw}=parseText(txt);const items=[];
-  const fd=k=>FIELDS.find(f=>f.k===k);
-  Object.entries(P).forEach(([k,v])=>{const f=fd(k);if(!f)return;const curV=cur[k];if(curV===v)return;
+function buildItems(P,many,kw){
+  const items=[],fd=k=>FIELDS.find(f=>f.k===k);
+  Object.entries(P).forEach(([k,v])=>{const f=fd(k);if(!f||!v)return;const curV=cur[k];if(curV===v)return;
     items.push({k,kind:f.y==='one'?'one':'text',val:v,label:tr(f.l),cur:curV?(f.y==='one'?tr(curV):curV):'',checked:!curV})});
-  Object.entries(many).forEach(([k,vals])=>{const nv=vals.filter(v=>!(cur[k]||[]).includes(v));if(nv.length)items.push({k,kind:'many',val:nv,label:tr(fd(k).l),cur:'',checked:true})});
+  Object.entries(many).forEach(([k,vals])=>{const nv=vals.filter(v=>!asArr(cur[k]).includes(v));if(nv.length)items.push({k,kind:'many',val:nv,label:tr(fd(k).l),cur:'',checked:true})});
   if(kw.length){const have=(cur.parc||[]).map(r=>r.kw).filter(Boolean);const nk=kw.filter(x=>!have.includes(x));if(nk.length)items.push({k:'parc',kind:'parc',val:nk,label:tr('Équipements')+' · P (kW)',cur:'',checked:true})}
-  if(!items.length){toast(t('nothingFound'));return}
-  dialog(`<h3>${t('reviewTitle')}</h3><p>${t('reviewHelp')}</p><div class="rv">${items.map((it,i)=>`<div class="it">
+  return items;
+}
+function openReview(items,title,extra){
+  dialog(`<h3>${title||t('reviewTitle')}</h3><p>${t('reviewHelp')}</p><div class="rv">${items.map((it,i)=>`<div class="it">
     <input type="checkbox" id="rv_${i}" ${it.checked?'checked':''}><label for="rv_${i}" class="k">${esc(it.label)}</label>
     <div class="v">${it.kind==='text'?(it.k==='probleme'?`<textarea id="rvv_${i}" rows="3" aria-label="${esc(it.label)}" style="width:100%;border:1px solid var(--line);border-radius:4px;padding:6px 8px">${esc(it.val)}</textarea>`:`<input id="rvv_${i}" value="${esc(it.val)}" aria-label="${esc(it.label)}">`):esc(it.kind==='many'?it.val.map(tr).join(', '):it.kind==='parc'?it.val.map(x=>x+' kW').join(', '):tr(it.val))}</div>
-    ${it.cur?`<div class="curv">${t('current')} : ${esc(it.cur)}</div>`:''}</div>`).join('')}</div>
+    ${it.cur?`<div class="curv">${t('current')} : ${esc(it.cur)}</div>`:''}</div>`).join('')}</div>${extra||''}
     <div class="row"><button class="btn" data-close>${t('cancel')}</button><button class="btn pri" id="rvOk">${t('apply')}</button></div>`,
   ()=>{$('#rvOk').onclick=()=>{let n=0;
     items.forEach((it,i)=>{if(!$('#rv_'+i).checked)return;n++;
       if(it.kind==='text')cur[it.k]=$('#rvv_'+i).value.trim();
       else if(it.kind==='one')cur[it.k]=it.val;
-      else if(it.kind==='many'){cur[it.k]=[...(cur[it.k]||[]),...it.val]}
+      else if(it.kind==='many'){cur[it.k]=[...asArr(cur[it.k]),...it.val]}
       else if(it.kind==='parc'){cur.parc=cur.parc&&cur.parc.length?cur.parc:[{}];it.val.forEach(v=>{const r=cur.parc.find(x=>!x.kw);if(r)r.kw=v;else cur.parc.push({kw:v})})}});
     closeDlg();renderForm();touch();toast(t('applied')(n))}});
+}
+function analyzeAndReview(){
+  const txt=(cur.transcript||'').trim();
+  if(!txt){toast(t('noText'));return}
+  const {P,many,kw}=parseText(txt);
+  const items=buildItems(P,many,kw);
+  if(!items.length){toast(t('nothingFound'));return}
+  openReview(items);
 }
 
 /* --- Réception d'un texte partagé depuis une autre application (share target Android) --- */
@@ -996,6 +1016,163 @@ function receiveText(txt){
         appendTranscript(txt);renderForm();await persist();
         const s=$('#f_transcript');if(s)s.scrollIntoView({block:'center'});analyzeAndReview()};
       if(last)$('#rcCur').onclick=()=>go(last);$('#rcNew').onclick=()=>go(null)});
+}
+
+/* ---------- Lecture de la carte de visite (reconnaissance de texte embarquée) ---------- */
+Object.assign(DICT.nl,{'Texte lu sur la carte':'Tekst gelezen op het kaartje'});
+Object.assign(DICT.en,{'Texte lu sur la carte':'Text read from the card'});
+Object.assign(UI.fr,{readCard:'Lire la carte',ocrLoading:'Préparation de la lecture…',ocrReading:p=>`Lecture de la carte… ${p} %`,ocrNothing:'Aucune coordonnée reconnue sur la carte. Reprenez la photo à plat, bien éclairée, ou complétez à la main.',
+  ocrErr:'Lecture impossible. La première utilisation demande une connexion internet (environ 11 Mo). Voir « Préparer la lecture de carte » dans les paramètres.',
+  ocrTitle:'Carte de visite : valeurs lues',ocrPrep:'Préparer la lecture de carte hors ligne',ocrPrepHelp:'Télécharge une fois le moteur de lecture et les langues FR, NL, EN (environ 11 Mo, en wifi). La lecture fonctionne ensuite sans réseau.',ocrReady:'Lecture de carte prête, utilisable hors ligne',
+  photoTip:'Carte à plat, bien éclairée, sans reflet, cadrée au plus près.'});
+Object.assign(UI.nl,{readCard:'Kaartje lezen',ocrLoading:'Lezen voorbereiden…',ocrReading:p=>`Kaartje lezen… ${p} %`,ocrNothing:'Geen gegevens herkend op het kaartje. Neem de foto opnieuw, plat en goed belicht, of vul manueel aan.',
+  ocrErr:'Lezen onmogelijk. Het eerste gebruik vereist een internetverbinding (ongeveer 11 MB). Zie « Kaartlezing voorbereiden » in de instellingen.',
+  ocrTitle:'Visitekaartje: gelezen waarden',ocrPrep:'Kaartlezing offline voorbereiden',ocrPrepHelp:'Downloadt eenmalig de leesmotor en de talen FR, NL, EN (ongeveer 11 MB, via wifi). Daarna werkt het lezen zonder netwerk.',ocrReady:'Kaartlezing klaar, ook offline bruikbaar',
+  photoTip:'Kaartje plat, goed belicht, zonder weerspiegeling, zo dicht mogelijk ingekaderd.'});
+Object.assign(UI.en,{readCard:'Read card',ocrLoading:'Preparing card reading…',ocrReading:p=>`Reading card… ${p} %`,ocrNothing:'No contact details recognised on the card. Retake the photo flat and well lit, or complete manually.',
+  ocrErr:'Reading failed. First use needs an internet connection (about 11 MB). See « Prepare card reading » in settings.',
+  ocrTitle:'Business card: values read',ocrPrep:'Prepare card reading for offline use',ocrPrepHelp:'Downloads the reading engine and FR, NL, EN languages once (about 11 MB, over wifi). Reading then works without a network.',ocrReady:'Card reading ready, works offline',
+  photoTip:'Card flat, well lit, no glare, framed as tightly as possible.'});
+
+const OCR_BASE=new URL('ocr/',location.href).href;
+let ocrWorker=null, ocrInit=null, ocrCb=null;
+function loadScript(src){return new Promise((res,rej)=>{if(window.Tesseract)return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function getOcr(){
+  if(ocrWorker)return Promise.resolve(ocrWorker);
+  if(!ocrInit)ocrInit=(async()=>{
+    await loadScript(OCR_BASE+'tesseract.min.js');
+    const w=await Tesseract.createWorker(['fra','nld','eng'],1,{workerPath:OCR_BASE+'worker.min.js',corePath:OCR_BASE+'core',langPath:OCR_BASE+'lang',gzip:true,workerBlobURL:false,logger:m=>ocrCb&&ocrCb(m)});
+    ocrWorker=w;return w;
+  })().catch(e=>{ocrInit=null;throw e});
+  return ocrInit;
+}
+// Image : redimensionnement, niveaux de gris, étirement du contraste
+function prepImage(src){return new Promise((res,rej)=>{
+  const img=new Image(),isBlob=src instanceof Blob,u=isBlob?URL.createObjectURL(src):src;
+  img.onload=()=>{const M=Math.max(img.width,img.height);const s=M>2200?2200/M:(M<1400?1400/M:1);
+    const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+    const x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);if(isBlob)URL.revokeObjectURL(u);
+    const d=x.getImageData(0,0,c.width,c.height),p=d.data,h=new Uint32Array(256);
+    for(let i=0;i<p.length;i+=4){const g=(p[i]*299+p[i+1]*587+p[i+2]*114)/1000|0;p[i]=g;h[g]++}
+    const n=p.length/4;let lo=0,hi=255,acc=0;while(lo<255&&(acc+=h[lo])<n*0.01)lo++;acc=0;while(hi>0&&(acc+=h[hi])<n*0.01)hi--;
+    const k=hi>lo?255/(hi-lo):1;for(let i=0;i<p.length;i+=4){const g=Math.max(0,Math.min(255,(p[i]-lo)*k));p[i]=p[i+1]=p[i+2]=g}
+    x.putImageData(d,0,0);res(c)};
+  img.onerror=rej;img.src=u})}
+function ocrStatus(msg){const el=$('#ocrSt');if(el){el.textContent=msg||'';el.hidden=!msg}}
+async function readCard(src){
+  if(!cur)return;const fid=cur.id;
+  ocrStatus(t('ocrLoading'));
+  ocrCb=m=>{if(m.status==='recognizing text')ocrStatus(t('ocrReading')(Math.round((m.progress||0)*100)))};
+  try{
+    const [w,canvas]=await Promise.all([getOcr(),prepImage(src)]);
+    // Deux passes complémentaires : texte épars (11) et bloc uniforme (6), lignes fusionnées sans doublon
+    let pass=0;ocrCb=m=>{if(m.status==='recognizing text')ocrStatus(t('ocrReading')(Math.round(((pass+(m.progress||0))/2)*100)))};
+    const texts=[];
+    for(const psm of ['11','6']){await w.setParameters({tessedit_pageseg_mode:psm,user_defined_dpi:'300',preserve_interword_spaces:'1'});
+      const {data}=await w.recognize(canvas);texts.push(data&&data.text||'');pass++}
+    ocrStatus('');
+    if(!cur||cur.id!==fid)return;
+    const text=mergeOcr(texts);
+    cur.carteTexte=text;touch();
+    const P=parseCard(text);
+    const many={};if(P.fonction){const nt=norm(P.fonction);const r=FIELDS.find(f=>f.k==='role').o.filter(o=>termsFor(o).some(tm=>tm&&hasTerm(nt,tm)));if(r.length)many.role=r}
+    const items=buildItems(P,many,[]);
+    if(!items.length){toast(t('ocrNothing'));return}
+    openReview(items,t('ocrTitle'),text?`<details class="ocrraw"><summary>${esc(tr('Texte lu sur la carte'))}</summary><pre>${esc(text)}</pre></details>`:'');
+  }catch(e){ocrStatus('');console.warn(e);toast(t('ocrErr'))}
+}
+
+function mergeOcr(texts){
+  const out=[],toks=[];
+  const tk=l=>norm(l).split(/\s+/).filter(x=>x.length>1);
+  texts.forEach(tx=>tx.split(/\n+/).map(l=>l.trim()).filter(l=>/[A-Za-zÀ-ÿ0-9]{2}/.test(l)).forEach(l=>{
+    const tl=tk(l);if(!tl.length)return;
+    const dup=toks.some(set=>tl.filter(x=>set.has(x)).length>=Math.ceil(tl.length*0.6));
+    if(!dup){out.push(l);toks.push(new Set(tl))}}));
+  return out.join('\n');
+}
+/* Analyse du texte d'une carte de visite */
+const GENERIC_MAIL=/^(gmail|googlemail|hotmail|outlook|live|msn|yahoo|icloud|me|skynet|telenet|proximus|scarlet|voo|orange|free|wanadoo|sfr|laposte|gmx|web|t-online|ziggo|kpnmail|planet)$/;
+const JOB_RE=/\b(responsable|directeur|directrice|director|manager|managing|ing[ée]nieur|engineer|technicien|technician|technical|acheteur|acheteuse|buyer|purchas\w*|sales|commercial|account|g[ée]rant|administrat\w*|ceo|cto|coo|cfo|head|chef|verantwoordelijke|zaakvoerder|bedrijfsleider|co[öo]rdinat\w*|planner|project|projet|maintenance|onderhoud\w*|op[ée]rat\w*|consultant|adviseur|conseill\w*|assistant\w*|pr[ée]sident\w*|owner|partner|associ[ée]|supervis\w*|contrema[iî]tre|foreman|specialist|sp[ée]cialiste|expert|analyst|officer|vp|inspecteur|inspector|team\s?lead\w*|leader|business|export|key)\b/i;
+const CO_RE=/\b(s\.?a\.?|n\.?v\.?|b\.?v\.?|srl|sprl|bvba|sas|sarl|scrl|gmbh|ag|ltd|limited|inc|plc|llc|group|groupe|groep|industries|industrie|company|holding|asbl|vzw|s\.p\.a\.?)\b\.?/i;
+const STREET_RE=/\b(rue|avenue|av\.|chauss[ée]e|boulevard|bd|place|quai|route|chemin|all[ée]e|impasse|square|zoning|zone|parc|straat|laan|weg|steenweg|plein|kaai|dreef|lei|baan|singel|gracht|street|road|str\.?|strasse|straße|industriepark|industrieterrein|z\.?i\.?|bus|bte|bo[iî]te)\b/i;
+const COUNTRY={BE:{fr:'Belgique',nl:'België',en:'Belgium',re:/\b(belgique|belgi[eë]|belgium|belgien)\b/i,pre:'B',tel:'32'},
+  FR:{fr:'France',nl:'Frankrijk',en:'France',re:/\b(france|frankrijk)\b/i,pre:'F',tel:'33'},
+  NL:{fr:'Pays-Bas',nl:'Nederland',en:'Netherlands',re:/\b(pays[- ]bas|nederland|netherlands|holland)\b/i,pre:'NL',tel:'31'},
+  LU:{fr:'Luxembourg',nl:'Luxemburg',en:'Luxembourg',re:/\b(luxembourg|luxemburg)\b/i,pre:'L',tel:'352'},
+  DE:{fr:'Allemagne',nl:'Duitsland',en:'Germany',re:/\b(allemagne|duitsland|germany|deutschland)\b/i,pre:'D',tel:'49'},
+  CH:{fr:'Suisse',nl:'Zwitserland',en:'Switzerland',re:/\b(suisse|zwitserland|switzerland|schweiz)\b/i,pre:'CH',tel:'41'}};
+const countryName=c=>COUNTRY[c][S.lang]||COUNTRY[c].fr;
+const titleCase=s=>s.toLowerCase().replace(/(^|[\s'’-])([a-zà-ÿ])/g,(m,a,b)=>a+b.toUpperCase());
+function parseCard(raw){
+  const P={};if(!raw)return P;
+  raw=raw.replace(/[|¦]/g,' ').replace(/\s*@\s*/g,'@');
+  const lines=raw.split(/\n+/).map(l=>l.replace(/[_~•·]+/g,' ').replace(/\s{2,}/g,' ').trim()).filter(l=>/[A-Za-zÀ-ÿ0-9]{2}/.test(l));
+  const used=new Set();
+  const PHONE=/(?:\+|00)\s?\(?\d{2,3}\)?[\s./()-]*(?:\d[\s./()-]*){6,11}\d|\b0\d(?:[\s./-]*\d){7,9}\b/g;
+  // E-mail
+  let m=raw.match(/([\w+-]+(?:\s?\.\s?[\w+-]+)*)@([\w-]+(?:\s?\.\s?[\w-]+)*?)(?:\s?\.\s?|\s)(be|com|fr|nl|eu|lu|de|net|org|info|biz|ch|uk|it|es)\b/i);
+  if(m)m=[(m[1]+'@'+m[2]+'.'+m[3]).replace(/\s/g,'')];
+  let domStem='';
+  if(m){P.mail=m[0].toLowerCase().replace(/[.,;]+$/,'');lines.forEach((l,i)=>{if(l.includes('@'))used.add(i)});
+    const dom=P.mail.split('@')[1].split('.');const st=dom.length>2?dom[dom.length-2]:dom[0];if(!GENERIC_MAIL.test(st))domStem=st}
+  // Site web
+  lines.forEach((l,i)=>{const w=l.match(/\b(?:https?:\/\/)?(?:www\.)([a-z0-9-]+)\.[a-z.]{2,6}\b/i)||l.match(/^\s*(?:https?:\/\/)?([a-z0-9-]+)\.(?:be|com|fr|nl|eu|lu|de|net|org)\s*$/i);
+    if(w&&!l.includes('@')){used.add(i);if(!domStem)domStem=w[1].toLowerCase()}});
+  // Téléphones (fax exclu, GSM en premier)
+  const mob=[],fix=[];let telCC='';
+  lines.forEach((l,i)=>{const ph=l.match(PHONE);if(!ph)return;used.add(i);
+    if(/\bfax\b|\bf\s*[:.]/i.test(l)&&ph.length===1)return;
+    ph.forEach(n=>{const d=n.replace(/\D/g,'');if(d.length<9||d.length>14)return;const v=n.trim().replace(/\s{2,}/g,' ');
+      const cc=(n.match(/^(?:\+|00)\s?(\d{2,3})/)||[])[1];if(cc&&!telCC)telCC=cc;
+      const isMob=/\b(gsm|mob\w*|portable|cell\w*|m)\s*[:.]?\s*$/i.test(l.slice(0,l.indexOf(n)))||/^(?:\+|00)\s?32\s?\(?0?\)?\s?4[5-9]|^04[5-9]|^(?:\+|00)\s?33\s?\(?0?\)?\s?[67]|^0[67]|^(?:\+|00)\s?31\s?\(?0?\)?\s?6|^06/.test(n.trim());
+      (isMob?mob:fix).push(v)})});
+  const tels=[...new Set([...mob,...fix])];if(tels.length)P.tel=tels.slice(0,3).join(' / ');
+  // Pays, code postal, ville, rue
+  let ctry='';
+  lines.forEach((l,i)=>{for(const c in COUNTRY)if(COUNTRY[c].re.test(l)){ctry=ctry||c;if(l.replace(COUNTRY[c].re,'').replace(/[\s,.-]/g,'').length<2)used.add(i)}});
+  const CPV=/(?:\b(B|F|NL|L|D|CH)\s?-\s?)?\b(\d{4}\s?[A-Z]{2}|\d{4,5})\s+([A-ZÀ-Þ][A-Za-zÀ-ÿ'’.-]+(?:[\s-](?:sur|sous|lez|lès|en|aan|de|la|le|[A-ZÀ-Þa-zà-ÿ][A-Za-zÀ-ÿ'’.-]+)){0,3})/;
+  for(let i=0;i<lines.length&&!P.cpVille;i++){const l=lines[i];if(l.includes('@'))continue;
+    const parts=l.split(/\s*[,;]\s*/);
+    for(let j=0;j<parts.length;j++){const pt=parts[j].replace(PHONE,'').trim();const c=pt.match(CPV);if(!c||c.index>pt.length/2+6)continue;
+      let city=c[3].replace(COUNTRY.BE.re,'').replace(/\b(belgique|belgi[eë]|belgium|france|nederland)\b/ig,'').trim();
+      P.cpVille=(c[2].replace(/\s+/,' ')+' '+city).trim();used.add(i);
+      if(c[1]){const k=Object.keys(COUNTRY).find(k=>COUNTRY[k].pre===c[1].toUpperCase());if(k)ctry=ctry||k}
+      else if(/^\d{4}\s?[A-Z]{2}$/.test(c[2]))ctry=ctry||'NL';
+      const before=[...parts.slice(0,j),pt.slice(0,c.index)].join(', ').replace(/[,\s-]+$/,'').trim();
+      if(before&&/\d/.test(before)&&/[A-Za-zÀ-ÿ]{3}/.test(before))P.rue=before;
+      else if(i>0&&!used.has(i-1)&&(STREET_RE.test(lines[i-1])||/[A-Za-zÀ-ÿ]{3}.*\d|\d.*[A-Za-zÀ-ÿ]{3}/.test(lines[i-1]))&&!lines[i-1].match(PHONE)){P.rue=lines[i-1];used.add(i-1)}
+      break}}
+  if(!P.rue){lines.forEach((l,i)=>{if(!P.rue&&!used.has(i)&&STREET_RE.test(l)&&/\d/.test(l)&&!l.includes('@')){P.rue=l;used.add(i)}})}
+  if(!ctry&&telCC){const k=Object.keys(COUNTRY).find(k=>COUNTRY[k].tel===telCC);if(k)ctry=k}
+  if(ctry)P.pays=countryName(ctry);
+  // Fonction
+  let fIdx=-1;
+  lines.forEach((l,i)=>{if(!P.fonction&&!used.has(i)&&JOB_RE.test(l)&&!/\d/.test(l)&&l.split(/\s+/).length<=7){P.fonction=l.replace(/^[^A-Za-zÀ-ÿ]+|[^A-Za-zÀ-ÿ)]+$/g,'');used.add(i);fIdx=i}});
+  // Société : ligne avec forme juridique, ou ligne contenant le nom du domaine
+  const stemN=norm(domStem).replace(/[^a-z0-9]/g,'');
+  let soc=-1;
+  const hasStem=l=>stemN.length>=3&&norm(l).replace(/[^a-z0-9]/g,'').includes(stemN);
+  lines.forEach((l,i)=>{if(soc<0&&!used.has(i)&&hasStem(l)&&CO_RE.test(l)&&l.length<=50)soc=i});
+  if(soc<0)lines.forEach((l,i)=>{if(soc<0&&!used.has(i)&&hasStem(l)&&l.length<=50)soc=i});
+  if(soc<0)lines.forEach((l,i)=>{if(soc<0&&!used.has(i)&&CO_RE.test(l)&&l.length<=50)soc=i});
+  if(soc>=0){P.societe=lines[soc].replace(/^[^A-Za-zÀ-ÿ0-9&]+|[^A-Za-zÀ-ÿ0-9.)]+$/g,'');used.add(soc)}
+  else if(domStem&&domStem.length>=3)P.societe=domStem.length<=4?domStem.toUpperCase():titleCase(domStem.replace(/-/g,' '));
+  // Nom : 2 à 4 mots alphabétiques, majuscules initiales ; bonus si le mail contient le prénom ou le nom
+  const local=P.mail?norm(P.mail.split('@')[0]).split(/[.\-_+]/).filter(x=>x.length>1):[];
+  let best=null,bs=0;
+  lines.forEach((l,i)=>{if(used.has(i))return;const c=l.replace(/[^A-Za-zÀ-ÿ'’ .-]/g,'').trim();const w=c.split(/\s+/).filter(Boolean);
+    if(w.length<2||w.length>4||c.length<5||c.length>40||/\d/.test(l)||JOB_RE.test(l)||CO_RE.test(l)||STREET_RE.test(l))return;
+    if(!w.every(x=>/^[A-ZÀ-Þ]/.test(x)||/^(de|van|der|den|le|la|du|von|da|di|del)$/i.test(x)))return;
+    let s=1;const nw=w.map(x=>norm(x));
+    local.forEach(p=>{if(nw.some(x=>x===p||(p.length>3&&x.startsWith(p))))s+=4});
+    if(local.length===1&&local[0].length>2&&nw.some(x=>local[0].includes(x)&&x.length>2))s+=3;
+    if(fIdx>=0&&Math.abs(fIdx-i)===1)s+=2;
+    if(i<=3)s+=1;
+    if(s>bs){bs=s;best=c}});
+  if(best)P.nom=best===best.toUpperCase()?titleCase(best):best;
+  else if(local.length===2&&local.every(x=>/^[a-z]+$/.test(x)))P.nom=titleCase(local.join(' '));
+  return P;
 }
 
 /* ---------- Salons : création, navigation, modification ---------- */
@@ -1047,6 +1224,7 @@ function ensureSalons(){
 async function migrateFiches(){
   let changed=false;
   for(const f of fiches){
+    for(const k of ['recuPar','secteurAttr'])if(typeof f[k]==='string'){f[k]=f[k]?[f[k]]:[];await dbPut(f)}
     if(f.salonId&&salonById(f.salonId))continue;
     let s=S.salons.find(x=>x.name===(f.salon||''));
     if(!s){s={id:uid(),name:f.salon||'Salon',days:3,dates:['','',''],counter:0,createdAt:f.createdAt||Date.now()};S.salons.push(s)}
