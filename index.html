@@ -320,7 +320,8 @@ const SECTIONS = [
   {k:'responsable',l:'Responsable',y:'text'},{k:'echeanceSuivi',l:'Échéance',y:'date'},
   {k:'documents',l:'Documents promis',y:'text'},{k:'crmDate',l:'Saisi CRM le',y:'date'},
  ]},
- {t:'8. Notes', f:[{k:'notes',l:'Notes',hideL:1,y:'area',rows:7}]},
+ {t:'8. Intérêt général', f:[{k:'interetGeneral',l:'Intérêt général',hideL:1,y:'one',o:['0','1','2','3','4','5']}]},
+ {t:'9. Notes', f:[{k:'notes',l:'Notes',hideL:1,y:'area',rows:7}]},
 ];
 const PARC_COLS=[['equip','Équipement / application'],['marque','Marque'],['type','Type / taille'],['qte','Qté'],['kw','P (kW)'],['age','Âge (ans)'],['crit','Criticité A/B/C']];
 const FIELDS = SECTIONS.flatMap(s=>s.f);
@@ -329,7 +330,7 @@ const FIELDS = SECTIONS.flatMap(s=>s.f);
 // Libellés et options du formulaire : clé = texte français
 const DICT = {
  nl:{
-  'Contexte':'Context','1. Identification':'1. Identificatie','2. Secteur':'2. Sector','3. Applications':'3. Toepassingen','4. Parc installé':'4. Geïnstalleerd park','5. Besoin exprimé':'5. Geuite behoefte','6. Contexte et qualification':'6. Context en kwalificatie','7. Action de suivi':'7. Opvolgactie','8. Notes':'8. Notities',
+  'Contexte':'Context','1. Identification':'1. Identificatie','2. Secteur':'2. Sector','3. Applications':'3. Toepassingen','4. Parc installé':'4. Geïnstalleerd park','5. Besoin exprimé':'5. Geuite behoefte','6. Contexte et qualification':'6. Context en kwalificatie','7. Action de suivi':'7. Opvolgactie','8. Intérêt général':'8. Algemene interesse','Intérêt général':'Algemene interesse','9. Notes':'9. Notities',
   'Reçu par':'Ontvangen door','Secteur attribué':'Toegewezen regio','Jour':'Dag','Statut':'Status','J1':'D1','J2':'D2','J3':'D3',
   'Prospect':'Prospect','Client existant':'Bestaande klant','Ancien client':'Voormalige klant','Concurrent / fournisseur':'Concurrent / leverancier','Autre':'Andere',
   'Société':'Bedrijf','Site / usine':'Site / fabriek','Rue':'Straat','CP / Ville':'Postcode / gemeente','Pays':'Land','N° client MGH':'MGH klantnr.','Nom, prénom':'Naam, voornaam','Fonction':'Functie','Mail':'E-mail','Tél. / GSM':'Tel. / GSM',
@@ -354,7 +355,7 @@ const DICT = {
   'Responsable':'Verantwoordelijke','Échéance':'Deadline','Documents promis':'Beloofde documenten','Saisi CRM le':'Ingevoerd in CRM op','Notes':'Notities',
  },
  en:{
-  'Contexte':'Context','1. Identification':'1. Identification','2. Secteur':'2. Industry','3. Applications':'3. Applications','4. Parc installé':'4. Installed base','5. Besoin exprimé':'5. Stated need','6. Contexte et qualification':'6. Context and qualification','7. Action de suivi':'7. Follow-up action','8. Notes':'8. Notes',
+  'Contexte':'Context','1. Identification':'1. Identification','2. Secteur':'2. Industry','3. Applications':'3. Applications','4. Parc installé':'4. Installed base','5. Besoin exprimé':'5. Stated need','6. Contexte et qualification':'6. Context and qualification','7. Action de suivi':'7. Follow-up action','8. Intérêt général':'8. General interest','Intérêt général':'General interest','9. Notes':'9. Notes',
   'Reçu par':'Received by','Secteur attribué':'Assigned territory','Jour':'Day','Statut':'Status','J1':'D1','J2':'D2','J3':'D3',
   'Prospect':'Prospect','Client existant':'Existing customer','Ancien client':'Former customer','Concurrent / fournisseur':'Competitor / supplier','Autre':'Other',
   'Société':'Company','Site / usine':'Site / plant','Rue':'Street','CP / Ville':'Postcode / city','Pays':'Country','N° client MGH':'MGH customer no.','Nom, prénom':'Last name, first name','Fonction':'Position','Mail':'Email','Tél. / GSM':'Phone / mobile',

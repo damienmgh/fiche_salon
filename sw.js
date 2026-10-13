@@ -1,6 +1,6 @@
 // Cache hors ligne de l'application. Incrémenter VERSION à chaque mise à jour des fichiers de l'application.
 // Le moteur de lecture de carte (dossier ocr/) a son propre cache, conservé entre les versions.
-const VERSION = 'mgh-fiche-salon-v7';
+const VERSION = 'mgh-fiche-salon-v8';
 const OCR_CACHE = 'mgh-fiche-salon-ocr-v1';
 const FILES = ['./', './index.html', './manifest.webmanifest', './logo.png', './icon-192.png', './icon-512.png'];
 
